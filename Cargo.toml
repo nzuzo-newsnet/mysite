@@ -1,0 +1,21 @@
+[package]
+name = "blogger"
+version = "0.1.0"
+authors = ["Nzuzo Magagula <nzuzo@newsnet.africa>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dioxus = { version = "0.7.0-alpha.3", features = ["router", "fullstack"] }
+dioxus-free-icons = { git="https://github.com/dioxus-community/dioxus-free-icons.git", features = ["lucide"] }
+dioxus_markdown = {git = "https://github.com/nzuzo-newsnet/markdown.git"}
+dioxus-primitives = { git = "https://github.com/DioxusLabs/components", version = "0.0.1", features = ["web"] }
+markdown = "1.0.0"
+
+[features]
+default = ["web"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
+server = ["dioxus/server"]

@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@source "./src/**/*.{rs,html,css}";
+@plugin "daisyui";
+@plugin '@tailwindcss/typography';
+
+@plugin "@tailwindcss/typography";
+
+/* html { */
+    /* font-size: 20px; */
+/* } */
+
+/* Markdown to Tailwind CSS class */
+/* .markdown { */
+    /* @apply max-w-none prose prose-lg; */
+/* } */
+
+/* .markdown h1 { */
+    /* @apply text-4xl font-bold text-gray-900 mb-6 mt-8 border-b border-gray-200 pb-3; */
+/* } */
+
+/* .markdown h2 { */
+    /* @apply text-3xl font-semibold text-gray-800 mb-5 mt-7 border-b border-gray-100 pb-2; */
+/* } */
+
+/* .markdown h3 { */
+    /* @apply text-2xl font-semibold text-gray-800 mb-4 mt-6; */
+/* } */
+
+/* .markdown h4 { */
+    /* @apply text-xl font-medium text-gray-700 mb-3 mt-5; */
+/* } */
+
+/* .markdown h5 { */
+    /* @apply text-lg font-medium text-gray-700 mb-3 mt-4; */
+/* } */
+
+/* .markdown h6 { */
+    /* @apply text-base font-medium text-gray-600 mb-2 mt-4; */
+/* } */
+
+/* .markdown p { */
+    /* @apply mb-4 leading-relaxed text-gray-700; */
+/* } */
+
+/* .markdown ul { */
+    /* @apply list-disc list-inside mb-4 space-y-2 text-gray-700; */
+/* } */
+
+/* .markdown ol { */
+    /* @apply list-decimal list-inside mb-4 space-y-2 text-gray-700; */
+/* } */
+
+/* .markdown li { */
+    /* @apply leading-relaxed; */
+/* } */
+
+/* .markdown li ul, */
+/* .markdown li ol { */
+    /* @apply mt-2 ml-6 mb-0; */
+/* } */
+
+/* .markdown blockquote { */
+    /* @apply border-l-4 border-blue-500 pl-6 py-3 mb-4 bg-blue-50 text-gray-700 italic; */
+/* } */
+
+/* .markdown code { */
+    /* @apply bg-gray-100 text-red-600 px-2 py-1 rounded text-sm font-mono; */
+/* } */
+
+/* .markdown pre { */
+    /* @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4; */
+/* } */
+
+/* .markdown pre code { */
+    /* @apply bg-transparent text-gray-100 p-0 text-sm; */
+/* } */
+
+/* .markdown a { */
+    /* @apply text-blue-600 hover:text-blue-800 underline decoration-blue-300 hover:decoration-blue-500 transition-colors; */
+/* } */
+
+/* .markdown strong { */
+    /* @apply font-bold text-gray-900; */
+/* } */
+
+/* .markdown em { */
+    /* @apply italic; */
+/* } */
+
+/* .markdown table { */
+    /* @apply w-full border-collapse border border-gray-300 mb-4; */
+/* } */
+
+/* .markdown th { */
+    /* @apply bg-gray-100 border border-gray-300 px-4 py-2 text-left font-semibold text-gray-800; */
+/* } */
+
+/* .markdown td { */
+    /* @apply border border-gray-300 px-4 py-2 text-gray-700; */
+/* } */
+
+/* .markdown hr { */
+    /* @apply border-0 h-px bg-gray-300 my-8; */
+/* } */
+
+/* .markdown img { */
+    /* @apply max-w-full h-auto rounded-lg shadow-sm mb-4; */
+/* } */
+
+/* .markdown del { */
+    /* @apply line-through text-gray-500; */
+/* } */
+
+/* .markdown mark { */
+    /* @apply bg-yellow-200 px-1 rounded; */
+/* } */
+
+/* Code syntax highlighting classes */
+/* .markdown .hljs { */
+    /* @apply bg-gray-900 text-gray-100; */
+/* } */
+
+/* .markdown .hljs-comment { */
+    /* @apply text-gray-400; */
+/* } */
+
+/* .markdown .hljs-keyword { */
+    /* @apply text-purple-400; */
+/* } */
+
+/* .markdown .hljs-string { */
+    /* @apply text-green-400; */
+/* } */
+
+/* .markdown .hljs-number { */
+    /* @apply text-yellow-400; */
+/* } */
+
+/* .markdown .hljs-function { */
+    /* @apply text-blue-400; */
+/* } */
