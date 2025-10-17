@@ -1,8 +1,15 @@
 use dioxus::prelude::*;
 use dioxus_markdown::Markdown;
 use markdown::{to_html_with_options, CompileOptions, Options};
+
+use crate::markdown_management::extract_readmes_for_account;
 #[component]
 pub fn Projects() -> Element {
+    let mut sources = use_resource(|| async move {
+        extract_readmes_for_account("orgs".to_string(), "newsnet-africa".to_string())
+            .await
+            .expect("Failed to extract ReadMEs")
+    });
     rsx! {
         article {
             class: "card card-md",
@@ -15,28 +22,22 @@ pub fn Projects() -> Element {
             }
             section {
                 class: "card-body",
-                for _ in 0..4 {
+                for (name, content) in sources.cloned().unwrap_or_default() {
                     ProjectItem {
-
+                        source: content
                     }
+                }
+                button {
+                    class: "btn",
+                    onclick: move |_| sources.restart(),
+                    "Click"
                 }
             }
         }
     }
 }
 #[component]
-fn ProjectItem() -> Element {
-    let source = r#"# Netabase
-[![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
-
-
-**Netabase** is a distributed, peer-to-peer database system built on top of [sled](https://github.com/spacejam/sled) with optional [libp2p](https://libp2p.io/) integration.
-It provides a type-safe, macro-driven approach to defining database schemas and models with support for primary keys, secondary keys, and relational queries.
-
-The system operates in two modes:
-- **Local Mode**: High-performance embedded database for single-node applications
-- **Distributed Mode**: P2P networked database with automatic synchronization (requires `libp2p` feature)"#;
+fn ProjectItem(source: String) -> Element {
     rsx! {
         article {
             class: "card card-md",

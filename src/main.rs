@@ -1,4 +1,7 @@
-use crate::{pages::home_page::HomePage, shared::nav_bar::NavBar};
+use crate::{
+    pages::{home_page::HomePage, project_page::ProjectPage},
+    shared::nav_bar::NavBar,
+};
 use dioxus::prelude::*;
 use dioxus_primitives::navbar::Navbar;
 pub mod markdown_management;
