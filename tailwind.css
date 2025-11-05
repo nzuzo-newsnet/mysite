@@ -1,9 +1,11 @@
 @import "tailwindcss";
 @source "./src/**/*.{rs,html,css}";
-@plugin "daisyui";
-@plugin '@tailwindcss/typography';
 
-@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  themes: light --default, dark, cupcake, dracula, cyberpunk, synthwave;
+}
+
+@plugin '@tailwindcss/typography';
 
 /* html { */
     /* font-size: 20px; */

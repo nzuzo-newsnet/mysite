@@ -5,6 +5,15 @@
 # HTML title tag content
 title = "blogger"
 
+# Wasm optimization settings
+[web.wasm-opt]
+# Enable wasm-opt in release mode
+level = 'z'  # Optimize for size
+
+# Pre-compress assets
+[web.pre-compress]
+enabled = true
+
 # include `assets` in web platform
 [web.resource]
 
@@ -19,3 +28,8 @@ script = []
 # Javascript code file
 # serve: [dev-server] only
 script = []
+
+# Development server settings
+[web.dev]
+# Enable watch mode for hot reload
+watch = true

@@ -6,14 +6,16 @@ use dioxus::prelude::*;
 pub fn HomePage() -> Element {
     rsx! {
         main {
-            class: "max-w-dvw max-h-dvh p-20",
+            class: "flex-1 w-full overflow-hidden p-2 sm:p-4 md:p-8",
             div {
-                class: "flex flex-row gap-50",
-                Projects {
-
+                class: "flex flex-col lg:flex-row gap-2 sm:gap-4 md:gap-8 h-full",
+                div {
+                    class: "flex-[3] h-full overflow-hidden",
+                    Blogs {}
                 }
-                Blogs {
-
+                div {
+                    class: "flex-[1] h-full overflow-hidden",
+                    Projects {}
                 }
             }
         }
