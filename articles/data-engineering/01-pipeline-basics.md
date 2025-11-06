@@ -7,6 +7,13 @@ tags = ["data", "etl", "pipeline", "engineering"]
 thumbnail = "https://raw.githubusercontent.com/github/explore/main/topics/data-science/data-science.png"
 reading_time = "13 min"
 category = "Tutorial"
+show_references = true
+show_demo = true
+show_related = true
+
+[[article_series]]
+name = "data-engineering"
+next = "data-engineering/02-data-quality"
 #####
 
 # Data Pipeline Fundamentals

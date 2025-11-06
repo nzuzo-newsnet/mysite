@@ -91,19 +91,13 @@ pub fn SeriesPage() -> Element {
 #[component]
 fn SeriesCard(series: SeriesData) -> Element {
     let article_count = series.articles.len();
-
-    // Get description from first article's summary if available
-    let description = series.articles.first()
-        .and_then(|article| article.toml_metadata.as_ref())
-        .and_then(|metadata| metadata.summary.clone())
-        .unwrap_or_else(|| format!("A series of {} articles", article_count));
-
     let article_label = if article_count == 1 { "article" } else { "articles" };
 
     rsx! {
-        article {
-            class: "card card-lg bg-base-200 hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary",
-            div {
+        Link {
+            to: format!("/series/{}", series.name),
+            class: "card card-lg bg-base-200 hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary cursor-pointer",
+            article {
                 class: "card-body",
 
                 // Header with series name
@@ -119,28 +113,37 @@ fn SeriesCard(series: SeriesData) -> Element {
                     }
                 }
 
-                // Description
-                p {
+                // Short Summary
+                div {
                     class: "text-base-content opacity-70 mb-4 flex-grow",
-                    "{description}"
+                    if let Some(ref short_summary) = series.short_summary {
+                        p {
+                            "{short_summary}"
+                        }
+                    } else {
+                        p {
+                            "A series of {article_count} articles exploring various topics"
+                        }
+                    }
                 }
 
-                // Article links
-                if !series.articles.is_empty() {
-                    div {
-                        class: "space-y-2 mb-4",
-                        for (idx, article) in series.articles.iter().enumerate() {
-                            Link {
-                                to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
-                                class: "btn btn-sm btn-ghost w-full justify-start gap-2 hover:btn-primary",
-                                span {
-                                    class: "badge badge-outline badge-sm",
-                                    "{idx + 1}"
-                                }
-                                span {
-                                    class: "truncate text-left flex-1",
-                                    "{article.metadata.title}"
-                                }
+                // View series button
+                div {
+                    class: "card-actions justify-end",
+                    button {
+                        class: "btn btn-primary btn-sm gap-2",
+                        "View Series"
+                        svg {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            class: "h-4 w-4",
+                            fill: "none",
+                            view_box: "0 0 24 24",
+                            stroke: "currentColor",
+                            path {
+                                stroke_linecap: "round",
+                                stroke_linejoin: "round",
+                                stroke_width: "2",
+                                d: "M9 5l7 7-7 7"
                             }
                         }
                     }

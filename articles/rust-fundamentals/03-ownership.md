@@ -7,6 +7,19 @@ tags = ["rust", "ownership", "memory-safety", "intermediate"]
 thumbnail = "https://www.rust-lang.org/static/images/rust-logo-blk.svg"
 reading_time = "15 min"
 category = "Tutorial"
+show_references = true
+show_demo = true
+show_quiz = true
+show_related = true
+
+[[article_series]]
+name = "rust-fundamentals"
+prev = "rust-fundamentals/02-setup"
+
+# This article can also be part of an advanced series
+[[article_series]]
+name = "advanced-rust-concepts"
+next = "advanced-rust/lifetimes"
 #####
 
 # Understanding Rust Ownership

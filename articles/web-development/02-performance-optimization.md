@@ -7,6 +7,12 @@ tags = ["web", "performance", "optimization", "javascript"]
 thumbnail = "https://raw.githubusercontent.com/github/explore/main/topics/javascript/javascript.png"
 reading_time = "14 min"
 category = "Tutorial"
+show_references = true
+show_quiz = true
+
+[[article_series]]
+name = "web-development"
+prev = "web-development/01-modern-web-stack"
 #####
 
 # Web Performance Optimization

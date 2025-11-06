@@ -7,6 +7,13 @@ tags = ["rust", "beginner", "setup", "tooling"]
 thumbnail = "https://www.rust-lang.org/static/images/rust-logo-blk.svg"
 reading_time = "10 min"
 category = "Tutorial"
+show_references = false
+show_demo = false
+
+[[article_series]]
+name = "rust-fundamentals"
+prev = "rust-fundamentals/01-introduction"
+next = "rust-fundamentals/03-ownership"
 #####
 
 # Setting Up Your Rust Development Environment

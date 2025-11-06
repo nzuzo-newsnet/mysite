@@ -7,6 +7,12 @@ tags = ["rust", "beginner", "introduction"]
 thumbnail = "https://www.rust-lang.org/static/images/rust-logo-blk.svg"
 reading_time = "8 min"
 category = "Tutorial"
+show_references = true
+show_related = true
+
+[[article_series]]
+name = "rust-fundamentals"
+next = "rust-fundamentals/02-setup"
 #####
 
 # Introduction to Rust Programming

@@ -7,6 +7,12 @@ tags = ["web", "javascript", "react", "frontend"]
 thumbnail = "https://raw.githubusercontent.com/github/explore/main/topics/javascript/javascript.png"
 reading_time = "12 min"
 category = "Tutorial"
+show_references = true
+show_demo = true
+
+[[article_series]]
+name = "web-development"
+next = "web-development/02-performance-optimization"
 #####
 
 # Building Modern Web Applications

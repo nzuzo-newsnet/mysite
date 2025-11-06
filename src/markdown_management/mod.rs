@@ -11,12 +11,15 @@ pub use local::{
     fetch_home_page_data,
     fetch_home_page_data_with_metadata,
     fetch_all_series,
+    fetch_series_by_name,
+    fetch_about_me,
     HomePageData,
     HomePageDataWithMetadata,
     ArticleMetadata,
     ArticleTomlMetadata,
     ArticleWithMetadata,
     SeriesInfo,
+    ArticleSeries,
     SeriesData,
 };
 pub use github::{fetch_github_repos, GitHubRepo};

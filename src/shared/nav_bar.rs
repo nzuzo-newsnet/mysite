@@ -1,11 +1,12 @@
 use dioxus::prelude::*;
 use dioxus::document::eval;
-use dioxus_free_icons::{icons::ld_icons::LdHome, Icon};
+use dioxus_free_icons::{Icon, icons::ld_icons::LdHome};
 
 #[component]
 pub fn NavBar() -> Element {
     let mut theme = use_signal(|| "dark".to_string());
     let mut is_loaded = use_signal(|| false);
+    let current_route = use_route::<crate::Route>();
 
     // Load theme from localStorage on mount only
     use_effect(move || {
@@ -87,6 +88,20 @@ pub fn NavBar() -> Element {
         ("sunset", "🌅 Sunset"),
     ];
 
+    // Helper function to check if route is active
+    let is_route_active = |route: &crate::Route| {
+        match (&current_route, route) {
+            (crate::Route::Home {}, crate::Route::Home {}) => true,
+            (crate::Route::About {}, crate::Route::About {}) => true,
+            (crate::Route::Demos {}, crate::Route::Demos {}) => true,
+            (crate::Route::Reading {}, crate::Route::Reading {}) => true,
+            (crate::Route::Series {}, crate::Route::Series {}) => true,
+            // SeriesDetail should also highlight the Series nav item
+            (crate::Route::SeriesDetail { .. }, crate::Route::Series {}) => true,
+            _ => false,
+        }
+    };
+
     rsx! {
         nav {
             class: "flex-shrink-0 w-full flex flex-col md:flex-row justify-between items-center p-3 md:p-5 gap-2 md:gap-4 bg-base-100 border-b border-base-300",
@@ -105,7 +120,11 @@ pub fn NavBar() -> Element {
                 // Internal pages
                 Link {
                     to: "/",
-                    class: "btn btn-ghost flex items-center gap-2",
+                    class: if is_route_active(&crate::Route::Home {}) {
+                        "btn btn-ghost btn-active bg-primary text-primary-content flex items-center gap-2"
+                    } else {
+                        "btn btn-ghost flex items-center gap-2"
+                    },
                     Icon {
                         height: 20,
                         width: 20,
@@ -117,25 +136,41 @@ pub fn NavBar() -> Element {
 
                 Link {
                     to: "/about",
-                    class: "btn btn-ghost",
+                    class: if is_route_active(&crate::Route::About {}) {
+                        "btn btn-ghost btn-active bg-primary text-primary-content"
+                    } else {
+                        "btn btn-ghost"
+                    },
                     "About"
                 }
 
                 Link {
                     to: "/demos",
-                    class: "btn btn-ghost",
+                    class: if is_route_active(&crate::Route::Demos {}) {
+                        "btn btn-ghost btn-active bg-primary text-primary-content"
+                    } else {
+                        "btn btn-ghost"
+                    },
                     "Demos"
                 }
 
                 Link {
                     to: "/reading",
-                    class: "btn btn-ghost",
+                    class: if is_route_active(&crate::Route::Reading {}) {
+                        "btn btn-ghost btn-active bg-primary text-primary-content"
+                    } else {
+                        "btn btn-ghost"
+                    },
                     "Reading"
                 }
 
                 Link {
                     to: "/series",
-                    class: "btn btn-ghost",
+                    class: if is_route_active(&crate::Route::Series {}) {
+                        "btn btn-ghost btn-active bg-primary text-primary-content"
+                    } else {
+                        "btn btn-ghost"
+                    },
                     "Series"
                 }
 

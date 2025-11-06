@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use dioxus_markdown::Markdown;
 
 use crate::markdown_management::{
-    fetch_home_page_data_with_metadata, ArticleTomlMetadata, ArticleWithMetadata,
+    ArticleTomlMetadata, ArticleWithMetadata, fetch_home_page_data_with_metadata,
 };
 
 #[component]
@@ -24,7 +24,7 @@ pub fn Blogs() -> Element {
             class: "card card-xl h-full flex flex-col",
             // Latest blog post (top half - 50vh)
             div {
-                class: "flex-1 max-h-[50vh] min-h-[50vh] overflow-hidden border-b border-base-300",
+                class: "flex-1 max-h-[40vh] min-h-[40vh] overflow-hidden border-b border-base-300",
                 header {
                     class: "card-header bg-base-100 sticky top-0 z-10",
                     h2 {
@@ -62,7 +62,7 @@ pub fn Blogs() -> Element {
 
             // Recent articles (bottom half - scrollable)
             div {
-                class: "flex-1 max-h-[50vh] min-h-[50vh] overflow-hidden",
+                class: "flex-1 max-h-[60vh] min-h-[60vh] overflow-hidden",
                 header {
                     class: "card-header bg-base-100 sticky top-0 z-10",
                     h2 {
@@ -71,7 +71,7 @@ pub fn Blogs() -> Element {
                     }
                 }
                 section {
-                    class: "card-body overflow-y-auto h-[calc(50vh-5rem)]",
+                    class: "card-body overflow-y-auto h-[calc(40vh-5rem)]",
                     {
                         match home_data.read().as_ref() {
                             Some(Some(data)) => {

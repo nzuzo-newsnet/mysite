@@ -24,6 +24,19 @@ pub struct SeriesInfo {
     pub parent: Option<Box<SeriesInfo>>,
 }
 
+/// Article series navigation for multi-series support
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ArticleSeries {
+    /// Name of the series (e.g., "data-engineering", "advanced-topics")
+    pub name: String,
+    /// Previous article in this series
+    #[serde(default)]
+    pub prev: Option<String>,
+    /// Next article in this series
+    #[serde(default)]
+    pub next: Option<String>,
+}
+
 /// TOML metadata extracted from markdown files
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct ArticleTomlMetadata {
@@ -49,12 +62,28 @@ pub struct ArticleTomlMetadata {
     /// Series information for grouped articles (can specify multiple)
     #[serde(default)]
     pub series: Vec<String>,
-    /// Previous article in sequence
+    /// Article series with navigation (supports multiple series)
+    #[serde(default)]
+    pub article_series: Vec<ArticleSeries>,
+    /// Legacy: Previous article in sequence (deprecated, use article_series)
     #[serde(default)]
     pub prev_article: Option<String>,
-    /// Next article in sequence
+    /// Legacy: Next article in sequence (deprecated, use article_series)
     #[serde(default)]
     pub next_article: Option<String>,
+    /// Bottom nav controls
+    #[serde(default = "default_true")]
+    pub show_references: bool,
+    #[serde(default)]
+    pub show_demo: bool,
+    #[serde(default)]
+    pub show_related: bool,
+    #[serde(default)]
+    pub show_quiz: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 /// Combined article data with content and metadata
@@ -389,12 +418,20 @@ pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMeta
     })
 }
 
+/// Series summary metadata from TOML frontmatter
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SeriesSummaryMetadata {
+    pub short_summary: Option<String>,
+}
+
 /// Series data with articles
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SeriesData {
     pub name: String,
     pub articles: Vec<ArticleWithMetadata>,
     pub total_articles: usize,
+    pub short_summary: Option<String>,
+    pub long_summary: Option<String>,
 }
 
 /// Fetch all series with their articles
@@ -446,22 +483,49 @@ pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
         }
     }
 
-    // Convert to SeriesData
-    let mut series_list: Vec<SeriesData> = series_map
-        .into_iter()
-        .map(|(name, mut articles)| {
-            // Sort articles by name within each series
-            articles.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
+    // Convert to SeriesData with summaries
+    let futures = series_map.into_iter().map(|(name, mut articles)| async move {
+        // Sort articles by name within each series
+        articles.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
 
-            let total_articles = articles.len();
+        let total_articles = articles.len();
 
-            SeriesData {
-                name,
-                articles,
-                total_articles,
-            }
-        })
-        .collect();
+        // Try to read summary.md from the series folder
+        let summary_path = format!("articles/{}/summary.md", name);
+        let (short_summary, long_summary) = match tokio::fs::read_to_string(&summary_path).await {
+            Ok(content) => {
+                // Parse TOML frontmatter and markdown content
+                if content.starts_with("#####") {
+                    let parts: Vec<&str> = content.splitn(3, "#####").collect();
+                    if parts.len() >= 3 {
+                        let toml_str = parts[1].trim();
+                        let markdown_content = parts[2].trim();
+
+                        // Parse TOML metadata
+                        let metadata: Result<SeriesSummaryMetadata, _> = toml::from_str(toml_str);
+                        let short = metadata.ok().and_then(|m| m.short_summary);
+
+                        (short, Some(markdown_content.to_string()))
+                    } else {
+                        (None, Some(content))
+                    }
+                } else {
+                    (None, Some(content))
+                }
+            },
+            Err(_) => (None, None),
+        };
+
+        SeriesData {
+            name,
+            articles,
+            total_articles,
+            short_summary,
+            long_summary,
+        }
+    });
+
+    let mut series_list: Vec<SeriesData> = join_all(futures).await;
 
     // Sort series by name
     series_list.sort_by(|a, b| a.name.cmp(&b.name));
@@ -469,4 +533,92 @@ pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
     dioxus::logger::tracing::info!("fetch_all_series: Found {} series", series_list.len());
 
     Ok(series_list)
+}
+
+/// Fetch a single series by name
+#[server]
+#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+pub async fn fetch_series_by_name(series_name: String) -> Result<SeriesData, ServerFnError> {
+    use futures::future::join_all;
+
+    dioxus::logger::tracing::info!("fetch_series_by_name: Fetching series '{}'", series_name);
+
+    // Fetch articles list (cached)
+    let articles = list_files().await?;
+
+    // Fetch all articles with metadata in parallel
+    let futures = articles.iter().map(|article| {
+        let path = article.path.clone();
+        async move { fetch_article_with_metadata(path).await }
+    });
+
+    let results: Vec<Result<ArticleWithMetadata, ServerFnError>> = join_all(futures).await;
+
+    // Collect articles that belong to this series
+    let mut series_articles: Vec<ArticleWithMetadata> = results
+        .into_iter()
+        .filter_map(|r| r.ok())
+        .filter(|article| {
+            if let Some(ref metadata) = article.toml_metadata {
+                // Check if article belongs to this series
+                metadata.primary_series.as_ref() == Some(&series_name) ||
+                metadata.series.contains(&series_name)
+            } else {
+                false
+            }
+        })
+        .collect();
+
+    if series_articles.is_empty() {
+        return Err(ServerFnError::new("Series not found"));
+    }
+
+    // Sort articles by name
+    series_articles.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
+
+    let total_articles = series_articles.len();
+
+    // Read summary.md from the series folder
+    let summary_path = format!("articles/{}/summary.md", series_name);
+    let (short_summary, long_summary) = match tokio::fs::read_to_string(&summary_path).await {
+        Ok(content) => {
+            // Parse TOML frontmatter and markdown content
+            if content.starts_with("#####") {
+                let parts: Vec<&str> = content.splitn(3, "#####").collect();
+                if parts.len() >= 3 {
+                    let toml_str = parts[1].trim();
+                    let markdown_content = parts[2].trim();
+
+                    // Parse TOML metadata
+                    let metadata: Result<SeriesSummaryMetadata, _> = toml::from_str(toml_str);
+                    let short = metadata.ok().and_then(|m| m.short_summary);
+
+                    (short, Some(markdown_content.to_string()))
+                } else {
+                    (None, Some(content))
+                }
+            } else {
+                (None, Some(content))
+            }
+        },
+        Err(_) => (None, None),
+    };
+
+    Ok(SeriesData {
+        name: series_name,
+        articles: series_articles,
+        total_articles,
+        short_summary,
+        long_summary,
+    })
+}
+
+/// Fetch about me content
+#[server]
+#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+pub async fn fetch_about_me() -> Result<String, ServerFnError> {
+    match tokio::fs::read_to_string("aboutme.md").await {
+        Ok(content) => Ok(content),
+        Err(_) => Err(ServerFnError::new("About me file not found")),
+    }
 }

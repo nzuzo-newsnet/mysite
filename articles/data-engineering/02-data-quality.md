@@ -7,6 +7,12 @@ tags = ["data", "quality", "validation", "testing"]
 thumbnail = "https://raw.githubusercontent.com/github/explore/main/topics/data-science/data-science.png"
 reading_time = "11 min"
 category = "Tutorial"
+show_references = true
+show_quiz = true
+
+[[article_series]]
+name = "data-engineering"
+prev = "data-engineering/01-pipeline-basics"
 #####
 
 # Ensuring Data Quality

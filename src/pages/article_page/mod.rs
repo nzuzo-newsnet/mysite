@@ -312,21 +312,56 @@ fn BottomNavPanel(active_tab: Signal<String>, metadata: Option<ArticleTomlMetada
             // Next/Prev Navigation (Required)
             div {
                 class: "flex flex-col items-center justify-center cursor-default gap-1",
+
+                // Series name badge if using new structure
+                if let Some(ref meta) = metadata {
+                    if !meta.article_series.is_empty() {
+                        span {
+                            class: "badge badge-xs badge-outline opacity-60",
+                            "{meta.article_series[0].name}"
+                        }
+                    }
+                }
+
                 div {
                     class: "flex gap-2",
                     if let Some(ref meta) = metadata {
-                        if let Some(ref prev) = meta.prev_article {
-                            Link {
-                                to: format!("/article/{}", prev),
-                                class: "btn btn-xs btn-ghost",
-                                "← Prev"
+                        // Use new article_series structure
+                        if !meta.article_series.is_empty() {
+                            {
+                                let series = &meta.article_series[0];
+                                rsx! {
+                                    if let Some(ref prev) = series.prev {
+                                        Link {
+                                            to: format!("/article/{}", prev),
+                                            class: "btn btn-xs btn-ghost",
+                                            "← Prev"
+                                        }
+                                    }
+                                    if let Some(ref next) = series.next {
+                                        Link {
+                                            to: format!("/article/{}", next),
+                                            class: "btn btn-xs btn-ghost",
+                                            "Next →"
+                                        }
+                                    }
+                                }
                             }
-                        }
-                        if let Some(ref next) = meta.next_article {
-                            Link {
-                                to: format!("/article/{}", next),
-                                class: "btn btn-xs btn-ghost",
-                                "Next →"
+                        } else {
+                            // Fall back to legacy fields
+                            if let Some(ref prev) = meta.prev_article {
+                                Link {
+                                    to: format!("/article/{}", prev),
+                                    class: "btn btn-xs btn-ghost",
+                                    "← Prev"
+                                }
+                            }
+                            if let Some(ref next) = meta.next_article {
+                                Link {
+                                    to: format!("/article/{}", next),
+                                    class: "btn btn-xs btn-ghost",
+                                    "Next →"
+                                }
                             }
                         }
                     } else {
@@ -338,101 +373,109 @@ fn BottomNavPanel(active_tab: Signal<String>, metadata: Option<ArticleTomlMetada
                 }
             }
 
-            // References Tab (Optional)
-            button {
-                class: if active_tab.read().as_str() == "references" { "dock-active" } else { "" },
-                onclick: move |_| active_tab.set("references".to_string()),
-                svg {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    class: "h-5 w-5",
-                    fill: "none",
-                    view_box: "0 0 24 24",
-                    stroke: "currentColor",
-                    path {
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        stroke_width: "2",
-                        d: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            // References Tab (Conditional)
+            if metadata.as_ref().map(|m| m.show_references).unwrap_or(true) {
+                button {
+                    class: if active_tab.read().as_str() == "references" { "dock-active" } else { "" },
+                    onclick: move |_| active_tab.set("references".to_string()),
+                    svg {
+                        xmlns: "http://www.w3.org/2000/svg",
+                        class: "h-5 w-5",
+                        fill: "none",
+                        view_box: "0 0 24 24",
+                        stroke: "currentColor",
+                        path {
+                            stroke_linecap: "round",
+                            stroke_linejoin: "round",
+                            stroke_width: "2",
+                            d: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        }
                     }
-                }
-                span {
-                    class: "dock-label",
-                    "References"
+                    span {
+                        class: "dock-label",
+                        "References"
+                    }
                 }
             }
 
-            // Demo Tab (Optional)
-            button {
-                class: if active_tab.read().as_str() == "demo" { "dock-active" } else { "" },
-                onclick: move |_| active_tab.set("demo".to_string()),
-                svg {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    class: "h-5 w-5",
-                    fill: "none",
-                    view_box: "0 0 24 24",
-                    stroke: "currentColor",
-                    path {
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        stroke_width: "2",
-                        d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+            // Demo Tab (Conditional)
+            if metadata.as_ref().map(|m| m.show_demo).unwrap_or(false) {
+                button {
+                    class: if active_tab.read().as_str() == "demo" { "dock-active" } else { "" },
+                    onclick: move |_| active_tab.set("demo".to_string()),
+                    svg {
+                        xmlns: "http://www.w3.org/2000/svg",
+                        class: "h-5 w-5",
+                        fill: "none",
+                        view_box: "0 0 24 24",
+                        stroke: "currentColor",
+                        path {
+                            stroke_linecap: "round",
+                            stroke_linejoin: "round",
+                            stroke_width: "2",
+                            d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                        }
+                        path {
+                            stroke_linecap: "round",
+                            stroke_linejoin: "round",
+                            stroke_width: "2",
+                            d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        }
                     }
-                    path {
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        stroke_width: "2",
-                        d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    span {
+                        class: "dock-label",
+                        "Demo"
                     }
-                }
-                span {
-                    class: "dock-label",
-                    "Demo"
                 }
             }
 
-            // Related Articles Tab (Optional)
-            button {
-                class: if active_tab.read().as_str() == "related" { "dock-active" } else { "" },
-                onclick: move |_| active_tab.set("related".to_string()),
-                svg {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    class: "h-5 w-5",
-                    fill: "none",
-                    view_box: "0 0 24 24",
-                    stroke: "currentColor",
-                    path {
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        stroke_width: "2",
-                        d: "M13 10V3L4 14h7v7l9-11h-7z"
+            // Related Articles Tab (Conditional)
+            if metadata.as_ref().map(|m| m.show_related).unwrap_or(false) {
+                button {
+                    class: if active_tab.read().as_str() == "related" { "dock-active" } else { "" },
+                    onclick: move |_| active_tab.set("related".to_string()),
+                    svg {
+                        xmlns: "http://www.w3.org/2000/svg",
+                        class: "h-5 w-5",
+                        fill: "none",
+                        view_box: "0 0 24 24",
+                        stroke: "currentColor",
+                        path {
+                            stroke_linecap: "round",
+                            stroke_linejoin: "round",
+                            stroke_width: "2",
+                            d: "M13 10V3L4 14h7v7l9-11h-7z"
+                        }
                     }
-                }
-                span {
-                    class: "dock-label",
-                    "Related"
+                    span {
+                        class: "dock-label",
+                        "Related"
+                    }
                 }
             }
 
-            // Quiz Tab (Optional)
-            button {
-                class: if active_tab.read().as_str() == "quiz" { "dock-active" } else { "" },
-                onclick: move |_| active_tab.set("quiz".to_string()),
-                svg {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    class: "h-5 w-5",
-                    fill: "none",
-                    view_box: "0 0 24 24",
-                    stroke: "currentColor",
-                    path {
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        stroke_width: "2",
-                        d: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+            // Quiz Tab (Conditional)
+            if metadata.as_ref().map(|m| m.show_quiz).unwrap_or(false) {
+                button {
+                    class: if active_tab.read().as_str() == "quiz" { "dock-active" } else { "" },
+                    onclick: move |_| active_tab.set("quiz".to_string()),
+                    svg {
+                        xmlns: "http://www.w3.org/2000/svg",
+                        class: "h-5 w-5",
+                        fill: "none",
+                        view_box: "0 0 24 24",
+                        stroke: "currentColor",
+                        path {
+                            stroke_linecap: "round",
+                            stroke_linejoin: "round",
+                            stroke_width: "2",
+                            d: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                        }
                     }
-                }
-                span {
-                    class: "dock-label",
-                    "Quiz"
+                    span {
+                        class: "dock-label",
+                        "Quiz"
+                    }
                 }
             }
         }
