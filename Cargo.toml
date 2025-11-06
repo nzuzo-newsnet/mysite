@@ -13,7 +13,7 @@ dioxus_markdown = {git = "https://github.com/nzuzo-newsnet/markdown.git"}
 dioxus-primitives = { git = "https://github.com/DioxusLabs/components", version = "0.0.1", features = ["web"] }
 markdown = "1.0.0"
 tokio = { version = "1.48.0", features = ["fs"], optional = true}
-chrono = { version = "*", optional = true }
+chrono = { version = "0.4", features = ["wasmbind"], optional = true }
 futures = { version = "0.3", optional = true }
 cached = { version = "0.54", features = ["async"], optional = true }
 anyhow = "1.0.100"
@@ -37,7 +37,7 @@ toml = "0.9.8"
 
 [features]
 default = ["web"]
-web = ["dioxus/web", "dep:netabase_store", "dep:netabase_macros", "dep:netabase_deps", "dep:bincode", "dep:strum", "dep:derive_more"]
+web = ["dioxus/web", "dep:netabase_store", "dep:netabase_macros", "dep:netabase_deps", "dep:bincode", "dep:strum", "dep:derive_more", "dep:chrono"]
 desktop = ["dioxus/desktop"]
 mobile = ["dioxus/mobile"]
 server = ["dioxus/server", "dep:tokio", "dep:chrono", "dep:futures", "dep:cached"]

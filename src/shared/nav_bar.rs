@@ -4,24 +4,87 @@ use dioxus_free_icons::{icons::ld_icons::LdHome, Icon};
 
 #[component]
 pub fn NavBar() -> Element {
-    let mut theme = use_signal(|| "light".to_string());
+    let mut theme = use_signal(|| "dark".to_string());
+    let mut is_loaded = use_signal(|| false);
 
-    // Update DOM when theme changes
+    // Load theme from localStorage on mount only
     use_effect(move || {
-        let current_theme = theme.read().clone();
-        let _ = eval(&format!(
-            r#"document.documentElement.setAttribute('data-theme', '{}');"#,
-            current_theme
-        ));
+        if !is_loaded() {
+            spawn(async move {
+                let load_script = r#"
+                    try {
+                        const savedTheme = localStorage.getItem('theme') || 'dark';
+                        document.documentElement.setAttribute('data-theme', savedTheme);
+                        dioxus.send(savedTheme);
+                    } catch (e) {
+                        console.error('Failed to load theme:', e);
+                        dioxus.send('dark');
+                    }
+                "#;
+
+                if let Ok(saved_theme) = eval(load_script).recv::<String>().await {
+                    theme.set(saved_theme.clone());
+                    is_loaded.set(true);
+                    dioxus::logger::tracing::info!("Loaded theme: {}", saved_theme);
+                }
+            });
+        }
+    });
+
+    // Apply theme changes (but not on initial load)
+    use_effect(move || {
+        if is_loaded() {
+            let current_theme = theme.read().clone();
+
+            let _ = eval(&format!(
+                r#"
+                try {{
+                    localStorage.setItem('theme', '{}');
+                    document.documentElement.setAttribute('data-theme', '{}');
+                }} catch (e) {{
+                    console.error('Failed to save theme:', e);
+                }}
+                "#,
+                current_theme, current_theme
+            ));
+
+            dioxus::logger::tracing::info!("Theme changed to: {}", current_theme);
+        }
     });
 
     let available_themes = vec![
         ("light", "☀️ Light"),
         ("dark", "🌙 Dark"),
         ("cupcake", "🧁 Cupcake"),
-        ("dracula", "🧛 Dracula"),
-        ("cyberpunk", "🤖 Cyberpunk"),
+        ("bumblebee", "🐝 Bumblebee"),
+        ("emerald", "💚 Emerald"),
+        ("corporate", "💼 Corporate"),
         ("synthwave", "🌆 Synthwave"),
+        ("retro", "📺 Retro"),
+        ("cyberpunk", "🤖 Cyberpunk"),
+        ("valentine", "💝 Valentine"),
+        ("halloween", "🎃 Halloween"),
+        ("garden", "🌻 Garden"),
+        ("forest", "🌲 Forest"),
+        ("aqua", "🌊 Aqua"),
+        ("lofi", "🎵 Lo-Fi"),
+        ("pastel", "🎨 Pastel"),
+        ("fantasy", "🦄 Fantasy"),
+        ("wireframe", "📐 Wireframe"),
+        ("black", "⬜ Black"),
+        ("luxury", "💎 Luxury"),
+        ("dracula", "🧛 Dracula"),
+        ("cmyk", "🖨️ CMYK"),
+        ("autumn", "🍂 Autumn"),
+        ("business", "📊 Business"),
+        ("acid", "🧪 Acid"),
+        ("lemonade", "🍋 Lemonade"),
+        ("night", "🌃 Night"),
+        ("coffee", "☕ Coffee"),
+        ("winter", "❄️ Winter"),
+        ("dim", "🔅 Dim"),
+        ("nord", "🏔️ Nord"),
+        ("sunset", "🌅 Sunset"),
     ];
 
     rsx! {
@@ -31,7 +94,7 @@ pub fn NavBar() -> Element {
             // Logo/Name
             Link {
                 to: "/",
-                class: "text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold hover:opacity-80 transition-opacity",
+                class: "text-xl sm:text-2xl md:text-3xl font-bold hover:opacity-80 transition-opacity",
                 "Nzuzo Magagula"
             }
 
@@ -122,7 +185,7 @@ pub fn NavBar() -> Element {
                         }
                     }
                     ul {
-                        class: "dropdown-content menu bg-base-200 rounded-box z-[100] w-52 p-2 shadow-lg border border-base-300 absolute",
+                        class: "dropdown-content menu bg-base-200 rounded-box z-[100] w-52 p-2 shadow-lg border border-base-300 absolute max-h-96 overflow-y-auto",
                         for (theme_id, theme_label) in available_themes.iter() {
                             li {
                                 key: "{theme_id}",

@@ -43,9 +43,12 @@ pub struct ArticleTomlMetadata {
     pub reading_time: Option<String>,
     #[serde(default)]
     pub category: Option<String>,
-    /// Series information for grouped articles
+    /// Primary series from folder structure (auto-detected)
     #[serde(default)]
-    pub series: Option<SeriesInfo>,
+    pub primary_series: Option<String>,
+    /// Series information for grouped articles (can specify multiple)
+    #[serde(default)]
+    pub series: Vec<String>,
     /// Previous article in sequence
     #[serde(default)]
     pub prev_article: Option<String>,
@@ -126,32 +129,63 @@ async fn extract_title_from_file(path: &std::path::Path) -> Result<String, std::
     Err(std::io::Error::new(std::io::ErrorKind::NotFound, "No title found"))
 }
 
+/// Recursively collect all markdown files from a directory (synchronous)
+#[cfg(feature = "server")]
+fn collect_markdown_files_sync(dir: &std::path::Path) -> Result<Vec<std::path::PathBuf>, std::io::Error> {
+    use std::fs;
+
+    let mut markdown_files = Vec::new();
+
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        let metadata = fs::metadata(&path)?;
+
+        if metadata.is_dir() {
+            // Recursively scan subdirectories
+            let mut sub_files = collect_markdown_files_sync(&path)?;
+            markdown_files.append(&mut sub_files);
+        } else if path.extension().and_then(|s| s.to_str()) == Some("md") {
+            markdown_files.push(path);
+        }
+    }
+
+    Ok(markdown_files)
+}
+
+/// Extract series name from folder path
+#[cfg(feature = "server")]
+fn extract_series_from_path(path: &std::path::Path, base_dir: &str) -> Option<String> {
+    // Get the parent directory relative to articles/
+    let parent = path.parent()?;
+    let parent_str = parent.to_str()?;
+
+    // Remove the base "articles/" prefix
+    if let Some(relative_path) = parent_str.strip_prefix(base_dir) {
+        let relative_path = relative_path.trim_start_matches('/');
+        if !relative_path.is_empty() {
+            // Convert path to series name (e.g., "rust/basics" -> "rust/basics")
+            return Some(relative_path.to_string());
+        }
+    }
+
+    None
+}
+
 /// List all available article files (server-side)
 #[server]
 #[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
 pub async fn list_files() -> Result<Vec<ArticleMetadata>, ServerFnError> {
     use tokio::fs;
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
     use futures::future::join_all;
 
     let articles_dir = "articles";
+    let base_path = Path::new(articles_dir);
 
-    let mut entries: tokio::fs::ReadDir = fs::read_dir(articles_dir)
-        .await
+    // Recursively collect all markdown files (using sync version to avoid async recursion complexity)
+    let file_paths = collect_markdown_files_sync(base_path)
         .map_err(|e| ServerFnError::new(format!("Failed to read articles directory: {}", e)))?;
-
-    // Collect all markdown file paths first
-    let mut file_paths = Vec::new();
-    while let Some(entry) = entries
-        .next_entry()
-        .await
-        .map_err(|e| ServerFnError::new(format!("Failed to read directory entry: {}", e)))?
-    {
-        let path: PathBuf = entry.path();
-        if path.extension().and_then(|s| s.to_str()) == Some("md") {
-            file_paths.push(path);
-        }
-    }
 
     // Process all files in parallel
     let futures = file_paths.into_iter().map(|path| async move {
@@ -166,13 +200,17 @@ pub async fn list_files() -> Result<Vec<ArticleMetadata>, ServerFnError> {
             .await
             .unwrap_or_else(|_| file_name.clone());
 
+        // Get relative path from articles directory
+        let relative_path = path
+            .strip_prefix(articles_dir)
+            .unwrap_or(&path)
+            .to_str()
+            .unwrap_or(&file_name)
+            .to_string();
+
         ArticleMetadata {
             name: file_name.clone(),
-            path: path
-                .file_name()
-                .and_then(|s| s.to_str())
-                .unwrap_or(&file_name)
-                .to_string(),
+            path: relative_path,
             title,
         }
     });
@@ -207,6 +245,7 @@ pub async fn fetch_article_content(path: String) -> Result<String, ServerFnError
 #[cached::proc_macro::cached(time = 3600, result = true, sync_writes = true, key = "String", convert = r#"{ path.clone() }"#)]
 pub async fn fetch_article_with_metadata(path: String) -> Result<ArticleWithMetadata, ServerFnError> {
     use tokio::fs;
+    use std::path::Path;
 
     // Sanitize the path to prevent directory traversal
     let safe_path = path.replace("..", "");
@@ -217,7 +256,18 @@ pub async fn fetch_article_with_metadata(path: String) -> Result<ArticleWithMeta
         .map_err(|e| ServerFnError::new(format!("Failed to read article: {}", e)))?;
 
     // Parse TOML metadata
-    let toml_metadata = parse_toml_metadata(&raw_content);
+    let mut toml_metadata = parse_toml_metadata(&raw_content);
+
+    // Extract primary series from folder structure
+    let path_buf = Path::new(&file_path);
+    let primary_series = extract_series_from_path(path_buf, "articles");
+
+    // Set primary_series in metadata if detected from folder
+    if let Some(ref mut metadata) = toml_metadata {
+        if primary_series.is_some() {
+            metadata.primary_series = primary_series;
+        }
+    }
 
     // Extract content without metadata delimiters
     let content = extract_content_without_metadata(&raw_content);
@@ -337,4 +387,86 @@ pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMeta
         first_article,
         recent_articles,
     })
+}
+
+/// Series data with articles
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SeriesData {
+    pub name: String,
+    pub articles: Vec<ArticleWithMetadata>,
+    pub total_articles: usize,
+}
+
+/// Fetch all series with their articles
+#[server]
+#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
+    use std::collections::HashMap;
+    use futures::future::join_all;
+
+    dioxus::logger::tracing::info!("fetch_all_series: Starting");
+
+    // Fetch articles list (cached)
+    let articles = list_files().await?;
+
+    // Fetch all articles with metadata in parallel
+    let futures = articles.iter().map(|article| {
+        let path = article.path.clone();
+        async move { fetch_article_with_metadata(path).await }
+    });
+
+    let results: Vec<Result<ArticleWithMetadata, ServerFnError>> = join_all(futures).await;
+
+    // Collect successful results
+    let articles_with_metadata: Vec<ArticleWithMetadata> = results
+        .into_iter()
+        .filter_map(|r| r.ok())
+        .collect();
+
+    // Group articles by series
+    let mut series_map: HashMap<String, Vec<ArticleWithMetadata>> = HashMap::new();
+
+    for article in articles_with_metadata {
+        if let Some(ref metadata) = article.toml_metadata {
+            // Add to primary series from folder structure
+            if let Some(ref primary_series) = metadata.primary_series {
+                series_map
+                    .entry(primary_series.clone())
+                    .or_insert_with(Vec::new)
+                    .push(article.clone());
+            }
+
+            // Add to additional series from metadata
+            for series_name in &metadata.series {
+                series_map
+                    .entry(series_name.clone())
+                    .or_insert_with(Vec::new)
+                    .push(article.clone());
+            }
+        }
+    }
+
+    // Convert to SeriesData
+    let mut series_list: Vec<SeriesData> = series_map
+        .into_iter()
+        .map(|(name, mut articles)| {
+            // Sort articles by name within each series
+            articles.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
+
+            let total_articles = articles.len();
+
+            SeriesData {
+                name,
+                articles,
+                total_articles,
+            }
+        })
+        .collect();
+
+    // Sort series by name
+    series_list.sort_by(|a, b| a.name.cmp(&b.name));
+
+    dioxus::logger::tracing::info!("fetch_all_series: Found {} series", series_list.len());
+
+    Ok(series_list)
 }

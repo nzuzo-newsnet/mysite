@@ -96,7 +96,7 @@ pub fn ReadingPage() -> Element {
             div {
                 class: "mb-8",
                 h1 {
-                    class: "text-5xl font-bold mb-4",
+                    class: "text-3xl font-bold mb-4",
                     "Reading List"
                 }
                 p {

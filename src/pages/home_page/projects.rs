@@ -23,7 +23,7 @@ pub fn Projects() -> Element {
             header {
                 class: "card-header bg-base-100 sticky top-0 z-10",
                 h2 {
-                    class: "text-xl sm:text-2xl md:text-3xl lg:text-4xl card-title",
+                    class: "text-lg sm:text-xl md:text-2xl card-title",
                     "Here's what I'm working on"
                 }
             }

@@ -2,18 +2,20 @@ use dioxus::prelude::*;
 use dioxus_markdown::Markdown;
 
 use crate::markdown_management::{
-    fetch_home_page_data_with_metadata,
-    ArticleWithMetadata,
-    ArticleTomlMetadata,
+    fetch_home_page_data_with_metadata, ArticleTomlMetadata, ArticleWithMetadata,
 };
 
 #[component]
 pub fn Blogs() -> Element {
     // Fetch articles with metadata
     let home_data = use_resource(|| async move {
-        dioxus::logger::tracing::info!("Starting to fetch home page data with metadata");
+        let start = chrono::Local::now();
+        dioxus::logger::tracing::info!(
+            "Starting to fetch home page data with metadata at: {start}"
+        );
         let result = fetch_home_page_data_with_metadata().await;
-        dioxus::logger::tracing::info!("Fetched home page data");
+        let end = chrono::Local::now();
+        dioxus::logger::tracing::info!("Fetched home page data at: {end}");
         result.ok()
     });
 
@@ -26,7 +28,7 @@ pub fn Blogs() -> Element {
                 header {
                     class: "card-header bg-base-100 sticky top-0 z-10",
                     h2 {
-                        class: "text-2xl sm:text-3xl md:text-4xl card-title",
+                        class: "text-xl sm:text-2xl md:text-3xl card-title",
                         "Latest Blog"
                     }
                 }
@@ -64,7 +66,7 @@ pub fn Blogs() -> Element {
                 header {
                     class: "card-header bg-base-100 sticky top-0 z-10",
                     h2 {
-                        class: "text-xl sm:text-2xl md:text-3xl card-title",
+                        class: "text-lg sm:text-xl md:text-2xl card-title",
                         "Recent Articles"
                     }
                 }
@@ -106,20 +108,17 @@ pub fn Blogs() -> Element {
 #[component]
 fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
     // Extract first few paragraphs for preview (limit to ~300 chars)
-    let preview_content = article.content
-        .chars()
-        .take(300)
-        .collect::<String>() + "...";
+    let preview_content = article.content.chars().take(300).collect::<String>() + "...";
 
     rsx! {
         div {
-            class: "space-y-4",
+            class: "space-y-4 flex md:flex-row h-full gap-3 items-center",
 
             // Thumbnail if available
             if let Some(ref metadata) = article.toml_metadata {
                 if let Some(ref thumbnail) = metadata.thumbnail {
                     div {
-                        class: "w-full h-64 overflow-hidden rounded-lg",
+                        class: "w-full h-32 overflow-hidden rounded-lg",
                         img {
                             src: "{thumbnail}",
                             alt: "Article thumbnail",
@@ -136,23 +135,29 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
                     is_full: true
                 }
             }
-
-            // Title as link
-            Link {
-                to: format!("/article/{}", article.metadata.name),
-                class: "link link-primary",
-                h1 {
-                    class: "text-3xl font-bold hover:opacity-80",
-                    "{article.metadata.title}"
+            div {
+                // Title as link
+                Link {
+                    to: format!("/article/{}", article.metadata.name),
+                    class: "link link-primary",
+                    h1 {
+                        class: "text-2xl font-bold hover:opacity-80",
+                        "{article.metadata.title}"
+                    }
                 }
-            }
 
-            // Summary or content preview
-            if let Some(ref metadata) = article.toml_metadata {
-                if let Some(ref summary) = metadata.summary {
-                    p {
-                        class: "text-lg text-base-content opacity-80",
-                        "{summary}"
+                // Summary or content preview
+                if let Some(ref metadata) = article.toml_metadata {
+                    if let Some(ref summary) = metadata.summary {
+                        p {
+                            class: "text-lg text-base-content opacity-80",
+                            "{summary}"
+                        }
+                    } else {
+                        p {
+                            class: "text-base-content opacity-80",
+                            "{preview_content}"
+                        }
                     }
                 } else {
                     p {
@@ -160,18 +165,13 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
                         "{preview_content}"
                     }
                 }
-            } else {
-                p {
-                    class: "text-base-content opacity-80",
-                    "{preview_content}"
-                }
-            }
 
-            // Read more link
-            Link {
-                to: format!("/article/{}", article.metadata.name),
-                class: "btn btn-primary",
-                "Read Full Article →"
+                // Read more link
+                Link {
+                    to: format!("/article/{}", article.metadata.name),
+                    class: "btn btn-primary",
+                    "Read Full Article →"
+                }
             }
         }
     }
@@ -182,13 +182,13 @@ fn ArticleSummaryCard(article: ArticleWithMetadata) -> Element {
     rsx! {
         Link {
             to: format!("/article/{}", article.metadata.name),
-            class: "card card-lg bg-base-200 hover:shadow-xl transition-all hover:scale-[1.02]",
+            class: "card card-sm image-full bg-base-200 shadow-sm transition-all hover:scale-[1.02]",
 
             // Thumbnail if available
             if let Some(ref metadata) = article.toml_metadata {
                 if let Some(ref thumbnail) = metadata.thumbnail {
                     figure {
-                        class: "h-48 overflow-hidden",
+                        class: "h-24 overflow-hidden",
                         img {
                             src: "{thumbnail}",
                             alt: "Article thumbnail",

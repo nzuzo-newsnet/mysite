@@ -1,116 +1,12 @@
 use dioxus::prelude::*;
-
-#[derive(Clone, PartialEq)]
-struct Series {
-    name: String,
-    description: String,
-    category: SeriesCategory,
-    total_parts: u32,
-    articles: Vec<String>,
-}
-
-#[derive(Clone, PartialEq)]
-enum SeriesCategory {
-    Projects,
-    Tutorials,
-    Concepts,
-    Research,
-}
-
-impl SeriesCategory {
-    fn as_str(&self) -> &str {
-        match self {
-            SeriesCategory::Projects => "Projects",
-            SeriesCategory::Tutorials => "Tutorials",
-            SeriesCategory::Concepts => "Concepts",
-            SeriesCategory::Research => "Research",
-        }
-    }
-
-    fn badge_class(&self) -> &str {
-        match self {
-            SeriesCategory::Projects => "badge-primary",
-            SeriesCategory::Tutorials => "badge-secondary",
-            SeriesCategory::Concepts => "badge-accent",
-            SeriesCategory::Research => "badge-info",
-        }
-    }
-
-    fn icon(&self) -> &str {
-        match self {
-            SeriesCategory::Projects => "🚀",
-            SeriesCategory::Tutorials => "📚",
-            SeriesCategory::Concepts => "💡",
-            SeriesCategory::Research => "🔬",
-        }
-    }
-}
+use crate::markdown_management::{fetch_all_series, SeriesData};
 
 #[component]
 pub fn SeriesPage() -> Element {
-    // Sample series - replace with actual data from your articles
-    let series_list = vec![
-        Series {
-            name: "Building a News Aggregator".to_string(),
-            description: "A comprehensive guide to building a scalable news aggregation platform with Rust and modern web technologies.".to_string(),
-            category: SeriesCategory::Projects,
-            total_parts: 5,
-            articles: vec![
-                "news-aggregator-part-1".to_string(),
-                "news-aggregator-part-2".to_string(),
-            ],
-        },
-        Series {
-            name: "Rust for Python Developers".to_string(),
-            description: "Learn Rust coming from a Python background, with practical examples and comparisons.".to_string(),
-            category: SeriesCategory::Tutorials,
-            total_parts: 8,
-            articles: vec![
-                "rust-python-part-1".to_string(),
-                "rust-python-part-2".to_string(),
-            ],
-        },
-        Series {
-            name: "Data Pipeline Architecture".to_string(),
-            description: "Design and implementation patterns for robust data processing pipelines.".to_string(),
-            category: SeriesCategory::Projects,
-            total_parts: 4,
-            articles: vec![
-                "data-pipeline-part-1".to_string(),
-            ],
-        },
-        Series {
-            name: "Machine Learning Fundamentals".to_string(),
-            description: "Core concepts and mathematical foundations of machine learning algorithms.".to_string(),
-            category: SeriesCategory::Concepts,
-            total_parts: 12,
-            articles: vec![
-                "ml-fundamentals-part-1".to_string(),
-                "ml-fundamentals-part-2".to_string(),
-                "ml-fundamentals-part-3".to_string(),
-            ],
-        },
-        Series {
-            name: "Web Performance Optimization".to_string(),
-            description: "Techniques and strategies for building fast, efficient web applications.".to_string(),
-            category: SeriesCategory::Tutorials,
-            total_parts: 6,
-            articles: vec![
-                "web-perf-part-1".to_string(),
-            ],
-        },
-    ];
-
-    let mut selected_category = use_signal(|| None::<SeriesCategory>);
-
-    let filtered_series: Vec<Series> = if let Some(ref category) = *selected_category.read() {
-        series_list.iter()
-            .filter(|s| s.category == *category)
-            .cloned()
-            .collect()
-    } else {
-        series_list.clone()
-    };
+    // Fetch series data from server
+    let series_data = use_resource(|| async move {
+        fetch_all_series().await.ok()
+    });
 
     rsx! {
         main {
@@ -118,65 +14,91 @@ pub fn SeriesPage() -> Element {
             div {
                 class: "container mx-auto max-w-7xl",
 
-            // Header
-            div {
-                class: "mb-8",
-                h1 {
-                    class: "text-5xl font-bold mb-4",
-                    "Article Series"
+                // Header
+                div {
+                    class: "mb-8",
+                    h1 {
+                        class: "text-3xl font-bold mb-4",
+                        "Article Series"
+                    }
+                    p {
+                        class: "text-lg text-base-content opacity-70",
+                        "Explore multi-part articles organized by topic and folder structure"
+                    }
                 }
-                p {
-                    class: "text-lg text-base-content opacity-70",
-                    "Explore multi-part articles organized by topic and category"
-                }
-            }
 
-            // Category filters
-            div {
-                class: "flex gap-3 mb-8 flex-wrap",
-                button {
-                    class: if selected_category.read().is_none() { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(None),
-                    "All Series"
-                }
-                button {
-                    class: if matches!(*selected_category.read(), Some(SeriesCategory::Projects)) { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(Some(SeriesCategory::Projects)),
-                    "{SeriesCategory::Projects.icon()} Projects"
-                }
-                button {
-                    class: if matches!(*selected_category.read(), Some(SeriesCategory::Tutorials)) { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(Some(SeriesCategory::Tutorials)),
-                    "{SeriesCategory::Tutorials.icon()} Tutorials"
-                }
-                button {
-                    class: if matches!(*selected_category.read(), Some(SeriesCategory::Concepts)) { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(Some(SeriesCategory::Concepts)),
-                    "{SeriesCategory::Concepts.icon()} Concepts"
-                }
-                button {
-                    class: if matches!(*selected_category.read(), Some(SeriesCategory::Research)) { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(Some(SeriesCategory::Research)),
-                    "{SeriesCategory::Research.icon()} Research"
-                }
-            }
+                // Content
+                match series_data.read().as_ref() {
+                    Some(Some(series_list)) => {
+                        if series_list.is_empty() {
+                            rsx! {
+                                div {
+                                    class: "text-center py-12",
+                                    p {
+                                        class: "text-lg text-base-content opacity-70",
+                                        "No article series found. Create folders in the articles directory to organize articles into series."
+                                    }
+                                }
+                            }
+                        } else {
+                            rsx! {
+                                // Series count
+                                div {
+                                    class: "mb-6",
+                                    p {
+                                        class: "text-sm text-base-content opacity-60",
+                                        "{series_list.len()} series found"
+                                    }
+                                }
 
-            // Series grid
-            div {
-                class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
-                for series in filtered_series {
-                    SeriesCard { series: series.clone() }
+                                // Series grid
+                                div {
+                                    class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+                                    for series in series_list {
+                                        SeriesCard { series: series.clone() }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Some(None) => rsx! {
+                        div {
+                            class: "text-center py-12",
+                            p {
+                                class: "text-lg text-error",
+                                "Failed to load series data"
+                            }
+                        }
+                    },
+                    None => rsx! {
+                        div {
+                            class: "text-center py-12",
+                            span {
+                                class: "loading loading-spinner loading-lg"
+                            }
+                            p {
+                                class: "mt-4 text-base-content opacity-70",
+                                "Loading series..."
+                            }
+                        }
+                    }
                 }
-            }
             }
         }
     }
 }
 
 #[component]
-fn SeriesCard(series: Series) -> Element {
-    let progress = (series.articles.len() as f32 / series.total_parts as f32 * 100.0) as u32;
-    let is_complete = series.articles.len() as u32 == series.total_parts;
+fn SeriesCard(series: SeriesData) -> Element {
+    let article_count = series.articles.len();
+
+    // Get description from first article's summary if available
+    let description = series.articles.first()
+        .and_then(|article| article.toml_metadata.as_ref())
+        .and_then(|metadata| metadata.summary.clone())
+        .unwrap_or_else(|| format!("A series of {} articles", article_count));
+
+    let article_label = if article_count == 1 { "article" } else { "articles" };
 
     rsx! {
         article {
@@ -184,84 +106,43 @@ fn SeriesCard(series: Series) -> Element {
             div {
                 class: "card-body",
 
-                // Header with category and icon
+                // Header with series name
                 div {
-                    class: "flex justify-between items-start mb-3",
-                    div {
-                        class: "flex items-center gap-2",
-                        span {
-                            class: "text-2xl",
-                            "{series.category.icon()}"
-                        }
-                        h3 {
-                            class: "card-title text-xl",
-                            "{series.name}"
-                        }
+                    class: "mb-3",
+                    h3 {
+                        class: "card-title text-xl",
+                        "{series.name}"
                     }
                     span {
-                        class: "badge {series.category.badge_class()}",
-                        "{series.category.as_str()}"
+                        class: "badge badge-primary mt-2",
+                        "{article_count} {article_label}"
                     }
                 }
 
                 // Description
                 p {
                     class: "text-base-content opacity-70 mb-4 flex-grow",
-                    "{series.description}"
-                }
-
-                // Progress bar
-                div {
-                    class: "mb-4",
-                    div {
-                        class: "flex justify-between text-sm mb-2",
-                        span {
-                            class: "text-base-content opacity-60",
-                            "{series.articles.len()} of {series.total_parts} parts"
-                        }
-                        span {
-                            class: if is_complete { "text-success font-semibold" } else { "text-base-content opacity-60" },
-                            if is_complete {
-                                "Complete ✓"
-                            } else {
-                                "{progress}%"
-                            }
-                        }
-                    }
-                    progress {
-                        class: if is_complete { "progress progress-success w-full" } else { "progress progress-primary w-full" },
-                        value: "{progress}",
-                        max: "100",
-                    }
+                    "{description}"
                 }
 
                 // Article links
                 if !series.articles.is_empty() {
                     div {
-                        class: "space-y-2",
+                        class: "space-y-2 mb-4",
                         for (idx, article) in series.articles.iter().enumerate() {
                             Link {
-                                to: format!("/article/{}", article),
-                                class: "btn btn-sm btn-ghost w-full justify-start gap-2",
+                                to: format!("/article/{}", article.metadata.name),
+                                class: "btn btn-sm btn-ghost w-full justify-start gap-2 hover:btn-primary",
                                 span {
                                     class: "badge badge-outline badge-sm",
-                                    "Part {idx + 1}"
+                                    "{idx + 1}"
                                 }
                                 span {
-                                    class: "truncate",
-                                    "{article}"
+                                    class: "truncate text-left flex-1",
+                                    "{article.metadata.title}"
                                 }
                             }
                         }
-                    }
-                }
-
-                // View Series button
-                div {
-                    class: "card-actions justify-end mt-4",
-                    button {
-                        class: "btn btn-primary btn-sm",
-                        "View Series →"
                     }
                 }
             }

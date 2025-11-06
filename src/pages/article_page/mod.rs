@@ -78,7 +78,7 @@ pub fn ArticlePage(path: String) -> Element {
                                                     div {
                                                         class: "p-8",
                                                         h2 {
-                                                            class: "text-2xl font-bold mb-4",
+                                                            class: "text-xl font-bold mb-4",
                                                             "References & Resources"
                                                         }
                                                         p {
@@ -91,7 +91,7 @@ pub fn ArticlePage(path: String) -> Element {
                                                     div {
                                                         class: "p-8",
                                                         h2 {
-                                                            class: "text-2xl font-bold mb-4",
+                                                            class: "text-xl font-bold mb-4",
                                                             "Interactive Demo"
                                                         }
                                                         p {
@@ -104,7 +104,7 @@ pub fn ArticlePage(path: String) -> Element {
                                                     div {
                                                         class: "p-8",
                                                         h2 {
-                                                            class: "text-2xl font-bold mb-4",
+                                                            class: "text-xl font-bold mb-4",
                                                             "Related Articles"
                                                         }
                                                         p {
@@ -117,7 +117,7 @@ pub fn ArticlePage(path: String) -> Element {
                                                     div {
                                                         class: "p-8",
                                                         h2 {
-                                                            class: "text-2xl font-bold mb-4",
+                                                            class: "text-xl font-bold mb-4",
                                                             "Check Your Knowledge"
                                                         }
                                                         p {
