@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_markdown::Markdown;
 
-use crate::markdown_management::{fetch_article_with_metadata, ArticleTomlMetadata};
+use crate::markdown_management::{ArticleTomlMetadata, fetch_article_with_metadata};
 
 #[component]
 pub fn ArticlePage(path: String) -> Element {
@@ -11,9 +11,7 @@ pub fn ArticlePage(path: String) -> Element {
     // Fetch article with metadata from server based on the path
     let article_data = use_resource(move || {
         let path = article_path.clone();
-        async move {
-            fetch_article_with_metadata(path).await
-        }
+        async move { fetch_article_with_metadata(path).await }
     });
 
     rsx! {
@@ -65,7 +63,7 @@ pub fn ArticlePage(path: String) -> Element {
                                                                     class: "flex flex-wrap gap-2",
                                                                     for tag in &meta.tags {
                                                                         span {
-                                                                            class: "badge badge-outline badge-lg",
+                                                                            class: "badge h-fit badge-outline badge-lg",
                                                                             "#{tag}"
                                                                         }
                                                                     }
@@ -337,10 +335,6 @@ fn BottomNavPanel(active_tab: Signal<String>, metadata: Option<ArticleTomlMetada
                             "No navigation"
                         }
                     }
-                }
-                span {
-                    class: "dock-label",
-                    "Navigate"
                 }
             }
 

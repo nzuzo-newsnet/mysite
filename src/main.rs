@@ -15,8 +15,8 @@ const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 enum Route {
     #[route("/")]
     Home {},
-    #[route("/article/:name")]
-    Article { name: String },
+    #[route("/article/:..segments")]
+    Article { segments: Vec<String> },
     #[route("/about")]
     About {},
     #[route("/demos")]
@@ -69,13 +69,16 @@ fn Home() -> Element {
 }
 
 #[component]
-fn Article(name: String) -> Element {
+fn Article(segments: Vec<String>) -> Element {
+    // Join segments to form the path (e.g., ["data-engineering", "01-pipeline-basics"] -> "data-engineering/01-pipeline-basics")
+    let path = segments.join("/");
+
     rsx! {
         div {
             class: "h-dvh flex flex-col overflow-hidden",
             NavBar {}
             pages::article_page::ArticlePage {
-                path: format!("{}.md", name)
+                path: format!("{}.md", path)
             }
         }
     }

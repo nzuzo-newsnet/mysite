@@ -2,12 +2,12 @@
 name = "blogger"
 version = "0.1.0"
 authors = ["Nzuzo Magagula <nzuzo@newsnet.africa>"]
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dioxus = { version = "0.7.0-alpha.3", features = ["router", "fullstack"] }
+dioxus = { version = "0.7.0-rc-3", features = ["router", "fullstack"] }
 dioxus-free-icons = { git="https://github.com/dioxus-community/dioxus-free-icons.git", features = ["lucide"] }
 dioxus_markdown = {git = "https://github.com/nzuzo-newsnet/markdown.git"}
 dioxus-primitives = { git = "https://github.com/DioxusLabs/components", version = "0.0.1", features = ["web"] }
@@ -27,9 +27,9 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 
 # Netabase cache dependencies
-netabase_store = { path = "../NewsNet/netabase_store", features = ["wasm"], optional = true }
-netabase_macros = { path = "../NewsNet/netabase_store/netabase_macros", optional = true }
-netabase_deps = { path = "../NewsNet/netabase_store/netabase_deps", optional = true }
+netabase_store = { git = "https://github.com/newsnet-africa/netabase_store.git", default-features = false, features = ["wasm"], optional = true }
+netabase_macros = { git = "https://github.com/newsnet-africa/netabase_store.git", optional = true }
+netabase_deps = { git = "https://github.com/newsnet-africa/netabase_store.git", optional = true }
 bincode = { version = "2.0", features = ["serde"], optional = true }
 strum = { version = "0.27.2", features = ["derive"], optional = true }
 derive_more = { version = "2.0.1", features = ["from", "try_into", "into"], optional = true }
@@ -47,8 +47,8 @@ opt-level = 'z'     # Optimize for size
 lto = true          # Enable Link Time Optimization
 codegen-units = 1   # Better optimization
 panic = 'abort'     # Reduce binary size
-strip = true        # Strip symbols
+strip = "debuginfo" # Strip only debug info, keep asset references
 
 [profile.release.package."*"]
 opt-level = 'z'
-strip = true
+strip = "debuginfo"

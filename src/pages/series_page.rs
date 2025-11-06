@@ -131,7 +131,7 @@ fn SeriesCard(series: SeriesData) -> Element {
                         class: "space-y-2 mb-4",
                         for (idx, article) in series.articles.iter().enumerate() {
                             Link {
-                                to: format!("/article/{}", article.metadata.name),
+                                to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
                                 class: "btn btn-sm btn-ghost w-full justify-start gap-2 hover:btn-primary",
                                 span {
                                     class: "badge badge-outline badge-sm",

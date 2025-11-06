@@ -138,7 +138,7 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
             div {
                 // Title as link
                 Link {
-                    to: format!("/article/{}", article.metadata.name),
+                    to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
                     class: "link link-primary",
                     h1 {
                         class: "text-2xl font-bold hover:opacity-80",
@@ -168,7 +168,7 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
 
                 // Read more link
                 Link {
-                    to: format!("/article/{}", article.metadata.name),
+                    to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
                     class: "btn btn-primary",
                     "Read Full Article →"
                 }
@@ -181,7 +181,7 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
 fn ArticleSummaryCard(article: ArticleWithMetadata) -> Element {
     rsx! {
         Link {
-            to: format!("/article/{}", article.metadata.name),
+            to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
             class: "card card-sm image-full bg-base-200 shadow-sm transition-all hover:scale-[1.02]",
 
             // Thumbnail if available

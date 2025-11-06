@@ -1,0 +1,21 @@
+FROM debian:bookworm-slim AS runtime
+
+# Install required runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy pre-built bundle from local machine
+COPY target/dx/blogger/release/web/ /usr/local/app
+
+# Copy articles folder
+COPY articles /usr/local/app/articles
+
+# Set environment variables
+ENV PORT=8080
+ENV IP=0.0.0.0
+
+EXPOSE 8080
+
+WORKDIR /usr/local/app
+ENTRYPOINT [ "/usr/local/app/blogger" ]

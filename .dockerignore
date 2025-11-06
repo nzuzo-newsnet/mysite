@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+target/
+dist/
+
+# Node modules
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# Misc
+*.log
+*.md
+!README.md
+!articles/**/*.md
+.env
+.DS_Store
