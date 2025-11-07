@@ -2,6 +2,7 @@
 date = "2025-11-07"
 author = "Nzuzo Magagula"
 summary = "How should we decide what to do?"
+thumbnail = "https://th.bing.com/th/id/R.c8fbc3dcf3682cd5713888b8343fe1c9?rik=JXeTCeHX3aWbAw&riu=http%3a%2f%2fducecc.com%2fwp-content%2fuploads%2f2016%2f10%2fBlueprint-of-Home.jpg&ehk=o2QGPTyNMi9c8VjHF4PbPajVbpxvDPfgNUecxqVrcQU%3d&risl=&pid=ImgRaw&r=0"
 category = "Educational"
 show_references = true
 
@@ -278,46 +279,278 @@ fn process_order() {
 
 ---
 
-### Coupling
+## Fan-in
 
-**Coupling** measures how *tightly* modules depend on each other’s internals.
-It’s a **qualitative** measure of how fragile the relationships are.
+While **fan-out** measures *how many other modules a given module depends on*,
+**fan-in** measures *how many other modules depend on a given module*.
 
-#### Tight Coupling Example
+Put differently:
 
-(As shown in your version — `Account` calling `Bank` directly.)
+> **Fan-out**: “How many things do I depend on?”
+> **Fan-in**: “How many things depend on me?”
 
-#### Improved (Message-Passing) Version
+Both metrics help describe the **interconnectivity** of a system.
+A healthy architecture maintains a balance between the two.
 
-(Your Rust message-passing refactor — excellent example retained.)
+---
+
+### Understanding Fan-in
+
+A high **fan-in** value means that the module is **widely reused** — it’s probably a **core utility or service**.
+That’s often a good thing, but it also means that **changes to this module can ripple throughout the system**.
+
+> Think of fan-in as a measure of *importance* and *risk*:
+> the higher the fan-in, the greater the potential impact of a change.
+
+---
+
+### Example
+
+```rust
+// High fan-in example — A common utility used across modules
+
+pub struct Logger;
+
+impl Logger {
+    pub fn log(&self, msg: &str) {
+        println!("[LOG]: {}", msg);
+    }
+}
+
+// Used by multiple modules:
+
+mod auth {
+    use super::Logger;
+    pub fn authenticate(user: &str, logger: &Logger) {
+        logger.log(&format!("Authenticating user: {}", user));
+    }
+}
+
+mod billing {
+    use super::Logger;
+    pub fn charge(amount: f64, logger: &Logger) {
+        logger.log(&format!("Charging user: ${}", amount));
+    }
+}
+
+fn main() {
+    let logger = Logger;
+    auth::authenticate("Alice", &logger);
+    billing::charge(42.0, &logger);
+}
+```
+
+Here, `Logger` has a **high fan-in** because many modules depend on it.
+If `Logger`’s interface changes (say, to include timestamps or write to a file), every dependent module may need modification.
+
+---
+
+### Evaluating Fan-in
+
+| Fan-in Level | Interpretation                        | Implication                                                       |
+| ------------ | ------------------------------------- | ----------------------------------------------------------------- |
+| **Low**      | Module isn’t reused often             | May indicate code duplication or missed abstraction opportunities |
+| **Medium**   | Module reused in a few related places | Generally healthy and maintainable                                |
+| **High**     | Module reused system-wide             | Indicates central utility, but changes carry risk                 |
+
+---
+
+### Fan-in vs Fan-out
+
+| Measure     | Question                           | Indicates                  | High Value Means               |
+| ----------- | ---------------------------------- | -------------------------- | ------------------------------ |
+| **Fan-out** | “How many modules do I depend on?” | **Coupling (outgoing)**    | Complex or over-reliant design |
+| **Fan-in**  | “How many modules depend on me?”   | **Reusability (incoming)** | Centralized or critical module |
+
+---
+
+### Balancing the Two
+
+* **High fan-in + Low fan-out** → Desirable. The module is simple yet widely useful (e.g., utility libraries, common data types).
+* **Low fan-in + High fan-out** → Dangerous. The module depends on many others but isn’t reused — a maintenance burden.
+* **High fan-in + High fan-out** → Risky. The module is central *and* complex — any change can have cascading effects.
+* **Low fan-in + Low fan-out** → Isolated. Safe, but potentially underutilized.
+
+---
+
+### Reducing Risk in High Fan-in Modules
+
+1. **Encapsulate functionality tightly**
+
+   * Keep interfaces minimal and stable.
+   * Expose only what’s needed via `pub(crate)` or traits.
+
+2. **Write strong integration tests**
+
+   * Ensure downstream modules don’t break with internal refactors.
+
+3. **Apply versioning discipline**
+
+   * For shared crates or libraries, use semantic versioning to control compatibility.
+
+4. **Document the interface**
+
+   * High fan-in modules often become de facto APIs for the team. Treat them that way.
+
+---
+
+### Quick Example of Balancing Fan-in and Fan-out
+
+```rust
+// Good balance example
+pub mod date_utils {
+    use chrono::{DateTime, Utc};
+
+    pub fn now_iso() -> String {
+        Utc::now().to_rfc3339()
+    }
+}
+
+// Used by multiple subsystems
+mod audit_log;
+mod reports;
+mod analytics;
+```
+
+Here, `date_utils` has a **high fan-in** (many depend on it), but a **low fan-out** (it depends only on `chrono`).
+That’s a clean, stable dependency structure — exactly what we want for shared components.
 
 ---
 
 ### Cohesion
 
-**Cohesion** measures how *focused* a module’s responsibilities are.
-A cohesive module has **one reason to change**.
+Cohesion measures how **strongly related and focused** the responsibilities of a single module are. A highly cohesive module does *one thing well* and contains only elements that directly contribute to that single purpose.
+In contrast, a poorly cohesive (or *low-cohesion*) module mixes unrelated concerns—like data handling, UI formatting, and network calls—all in one place.
 
-#### Low Cohesion Example
+Cohesion is usually a *qualitative* property that reflects how understandable, maintainable, and reusable a module is.
+High cohesion tends to reduce bugs and side effects because the logic is well-contained and has a clear reason to exist.
 
-(Your original `AccountService` example retained.)
+For example:
 
-#### High Cohesion Example
+```rust
+// Low cohesion example
+pub mod account_service {
+    use uuid::Uuid;
 
-(Your refactored version retained — it’s clear, idiomatic, and well-explained.)
+    pub struct AccountService {
+        pub db_conn: String,
+    }
+
+    impl AccountService {
+        pub fn create_account(&self, user_name: &str) -> Uuid {
+            // Handles database logic
+            println!("Connecting to DB: {}", self.db_conn);
+            let id = Uuid::new_v4();
+            println!("Inserting new account for {}", user_name);
+
+            // Also handles unrelated responsibilities:
+            // formatting, validation, and even sending an email!
+            if user_name.is_empty() {
+                panic!("Invalid username");
+            }
+
+            self.send_welcome_email(user_name);
+            id
+        }
+
+        fn send_welcome_email(&self, user_name: &str) {
+            println!("Sending welcome email to {}", user_name);
+        }
+    }
+}
+```
+
+Here, the `AccountService` is doing **too many unrelated things**:
+
+* database management,
+* input validation,
+* logging, and
+* sending emails.
+
+If you change how emails work or how validation happens, you’ll have to modify the same module — this is **low cohesion**. It becomes hard to reason about, and unrelated changes start to interfere.
 
 ---
 
-### Quick Cohesion Summary
+### Improved (High-Cohesion) Version
 
-| Property        | High Cohesion                  | Low Cohesion     |
-| --------------- | ------------------------------ | ---------------- |
-| Responsibility  | Single, well-defined           | Mixed, unrelated |
-| Maintainability | Easy                           | Difficult        |
-| Reusability     | High                           | Low              |
-| Example         | `AccountService` + `Validator` | One “god” module |
+Let’s refactor this so that each module has a **clear, single responsibility**.
+The `AccountService` will focus purely on *account creation*, while specialized modules handle their own domains.
 
----
+```rust
+pub mod account_service {
+    use uuid::Uuid;
+    use crate::{database::Database, email::EmailService, validation::Validator};
+
+    pub struct AccountService<'a> {
+        pub db: &'a Database,
+        pub email_service: &'a EmailService,
+        pub validator: &'a Validator,
+    }
+
+    impl<'a> AccountService<'a> {
+        pub fn create_account(&self, user_name: &str) -> Result<Uuid, String> {
+            self.validator.validate_username(user_name)?;
+
+            let account_id = self.db.insert_new_account(user_name)?;
+            self.email_service.send_welcome(user_name)?;
+
+            Ok(account_id)
+        }
+    }
+}
+
+// Cohesive, focused modules below:
+pub mod validation {
+    pub struct Validator;
+
+    impl Validator {
+        pub fn validate_username(&self, user_name: &str) -> Result<(), String> {
+            if user_name.is_empty() {
+                Err("Username cannot be empty".into())
+            } else {
+                Ok(())
+            }
+        }
+    }
+}
+
+pub mod email {
+    pub struct EmailService;
+
+    impl EmailService {
+        pub fn send_welcome(&self, user_name: &str) -> Result<(), String> {
+            println!("Sent welcome email to {user_name}");
+            Ok(())
+        }
+    }
+}
+
+pub mod database {
+    use uuid::Uuid;
+
+    pub struct Database;
+
+    impl Database {
+        pub fn insert_new_account(&self, user_name: &str) -> Result<Uuid, String> {
+            println!("Inserted new account for {user_name}");
+            Ok(Uuid::new_v4())
+        }
+    }
+}
+```
+
+Now, each module has **high cohesion**:
+
+| Module            | Responsibility                            |
+| ----------------- | ----------------------------------------- |
+| `account_service` | Coordinates the account creation process. |
+| `validation`      | Handles validation logic.                 |
+| `database`        | Encapsulates database operations.         |
+| `email`           | Handles outbound emails.                  |
+
+This separation ensures each module has *one reason to change*.
+For example, if the email API changes, you modify only `email.rs` — not `account_service.rs`.
+
 
 ### Bonus Example: Testing Cohesion in Rust
 
