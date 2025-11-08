@@ -155,12 +155,17 @@ async fn extract_title_from_file(path: &std::path::Path) -> Result<String, std::
         }
     }
 
-    Err(std::io::Error::new(std::io::ErrorKind::NotFound, "No title found"))
+    Err(std::io::Error::new(
+        std::io::ErrorKind::NotFound,
+        "No title found",
+    ))
 }
 
 /// Recursively collect all markdown files from a directory (synchronous)
 #[cfg(feature = "server")]
-fn collect_markdown_files_sync(dir: &std::path::Path) -> Result<Vec<std::path::PathBuf>, std::io::Error> {
+fn collect_markdown_files_sync(
+    dir: &std::path::Path,
+) -> Result<Vec<std::path::PathBuf>, std::io::Error> {
     use std::fs;
 
     let mut markdown_files = Vec::new();
@@ -174,7 +179,12 @@ fn collect_markdown_files_sync(dir: &std::path::Path) -> Result<Vec<std::path::P
             // Recursively scan subdirectories
             let mut sub_files = collect_markdown_files_sync(&path)?;
             markdown_files.append(&mut sub_files);
-        } else if path.extension().and_then(|s| s.to_str()) == Some("md") {
+        } else if path.extension().and_then(|s| s.to_str()) == Some("md")
+            && !path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .is_some_and(|s| s.contains("summary"))
+        {
             markdown_files.push(path);
         }
     }
@@ -205,9 +215,9 @@ fn extract_series_from_path(path: &std::path::Path, base_dir: &str) -> Option<St
 #[server]
 #[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
 pub async fn list_files() -> Result<Vec<ArticleMetadata>, ServerFnError> {
-    use tokio::fs;
-    use std::path::{Path, PathBuf};
     use futures::future::join_all;
+    use std::path::{Path, PathBuf};
+    use tokio::fs;
 
     let articles_dir = "articles";
     let base_path = Path::new(articles_dir);
@@ -254,7 +264,13 @@ pub async fn list_files() -> Result<Vec<ArticleMetadata>, ServerFnError> {
 
 /// Fetch article content from the filesystem (server-side)
 #[server]
-#[cached::proc_macro::cached(time = 3600, result = true, sync_writes = true, key = "String", convert = r#"{ path.clone() }"#)]
+#[cached::proc_macro::cached(
+    time = 3600,
+    result = true,
+    sync_writes = true,
+    key = "String",
+    convert = r#"{ path.clone() }"#
+)]
 pub async fn fetch_article_content(path: String) -> Result<String, ServerFnError> {
     use tokio::fs;
 
@@ -271,10 +287,18 @@ pub async fn fetch_article_content(path: String) -> Result<String, ServerFnError
 
 /// Fetch article with full metadata and processed content
 #[server]
-#[cached::proc_macro::cached(time = 3600, result = true, sync_writes = true, key = "String", convert = r#"{ path.clone() }"#)]
-pub async fn fetch_article_with_metadata(path: String) -> Result<ArticleWithMetadata, ServerFnError> {
-    use tokio::fs;
+#[cached::proc_macro::cached(
+    time = 3600,
+    result = true,
+    sync_writes = true,
+    key = "String",
+    convert = r#"{ path.clone() }"#
+)]
+pub async fn fetch_article_with_metadata(
+    path: String,
+) -> Result<ArticleWithMetadata, ServerFnError> {
     use std::path::Path;
+    use tokio::fs;
 
     // Sanitize the path to prevent directory traversal
     let safe_path = path.replace("..", "");
@@ -308,9 +332,7 @@ pub async fn fetch_article_with_metadata(path: String) -> Result<ArticleWithMeta
         .map(|line| line.trim_start_matches("# ").trim().to_string())
         .unwrap_or_else(|| safe_path.clone());
 
-    let name = safe_path
-        .trim_end_matches(".md")
-        .to_string();
+    let name = safe_path.trim_end_matches(".md").to_string();
 
     Ok(ArticleWithMetadata {
         metadata: ArticleMetadata {
@@ -325,7 +347,13 @@ pub async fn fetch_article_with_metadata(path: String) -> Result<ArticleWithMeta
 
 /// Fetch article content by name (without extension)
 #[server]
-#[cached::proc_macro::cached(time = 3600, result = true, sync_writes = true, key = "String", convert = r#"{ name.clone() }"#)]
+#[cached::proc_macro::cached(
+    time = 3600,
+    result = true,
+    sync_writes = true,
+    key = "String",
+    convert = r#"{ name.clone() }"#
+)]
 pub async fn fetch_article_by_name(name: String) -> Result<String, ServerFnError> {
     fetch_article_content(format!("{}.md", name)).await
 }
@@ -367,7 +395,8 @@ pub async fn fetch_home_page_data() -> Result<HomePageData, ServerFnError> {
 /// Fetch home page data with metadata for all articles
 #[server]
 #[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
-pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMetadata, ServerFnError> {
+pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMetadata, ServerFnError>
+{
     use futures::future::join_all;
 
     dioxus::logger::tracing::info!("fetch_home_page_data_with_metadata: Starting");
@@ -376,7 +405,11 @@ pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMeta
     // Fetch articles list (cached)
     let list_start = std::time::Instant::now();
     let articles = list_files().await?;
-    dioxus::logger::tracing::info!("fetch_home_page_data_with_metadata: Listed {} files in {:?}", articles.len(), list_start.elapsed());
+    dioxus::logger::tracing::info!(
+        "fetch_home_page_data_with_metadata: Listed {} files in {:?}",
+        articles.len(),
+        list_start.elapsed()
+    );
 
     // Fetch all articles with metadata in parallel
     let fetch_start = std::time::Instant::now();
@@ -386,13 +419,14 @@ pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMeta
     });
 
     let results: Vec<Result<ArticleWithMetadata, ServerFnError>> = join_all(futures).await;
-    dioxus::logger::tracing::info!("fetch_home_page_data_with_metadata: Fetched all articles in {:?}", fetch_start.elapsed());
+    dioxus::logger::tracing::info!(
+        "fetch_home_page_data_with_metadata: Fetched all articles in {:?}",
+        fetch_start.elapsed()
+    );
 
     // Collect successful results
-    let mut articles_with_metadata: Vec<ArticleWithMetadata> = results
-        .into_iter()
-        .filter_map(|r| r.ok())
-        .collect();
+    let mut articles_with_metadata: Vec<ArticleWithMetadata> =
+        results.into_iter().filter_map(|r| r.ok()).collect();
 
     // Sort by date (most recent first) if date is available in metadata
     articles_with_metadata.sort_by(|a, b| {
@@ -410,7 +444,10 @@ pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMeta
     let first_article = articles_with_metadata.first().cloned();
     let recent_articles = articles_with_metadata;
 
-    dioxus::logger::tracing::info!("fetch_home_page_data_with_metadata: Completed in {:?}", start.elapsed());
+    dioxus::logger::tracing::info!(
+        "fetch_home_page_data_with_metadata: Completed in {:?}",
+        start.elapsed()
+    );
 
     Ok(HomePageDataWithMetadata {
         first_article,
@@ -438,8 +475,8 @@ pub struct SeriesData {
 #[server]
 #[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
 pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
-    use std::collections::HashMap;
     use futures::future::join_all;
+    use std::collections::HashMap;
 
     dioxus::logger::tracing::info!("fetch_all_series: Starting");
 
@@ -458,7 +495,10 @@ pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
     let articles_with_metadata: Vec<ArticleWithMetadata> = results
         .into_iter()
         .filter_map(|r| r.ok())
-        .filter(|article| article.metadata.name != "summary")
+        .filter(|article| {
+            dioxus::logger::tracing::info!("File names: {}", article.metadata.name);
+            !article.metadata.name.contains("summary")
+        })
         .collect();
 
     // Group articles by series
@@ -485,46 +525,50 @@ pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
     }
 
     // Convert to SeriesData with summaries
-    let futures = series_map.into_iter().map(|(name, mut articles)| async move {
-        // Sort articles by name within each series
-        articles.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
+    let futures = series_map
+        .into_iter()
+        .map(|(name, mut articles)| async move {
+            // Sort articles by name within each series
+            articles.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
 
-        let total_articles = articles.len();
+            let total_articles = articles.len();
 
-        // Try to read summary.md from the series folder
-        let summary_path = format!("articles/{}/summary.md", name);
-        let (short_summary, long_summary) = match tokio::fs::read_to_string(&summary_path).await {
-            Ok(content) => {
-                // Parse TOML frontmatter and markdown content
-                if content.starts_with("#####") {
-                    let parts: Vec<&str> = content.splitn(3, "#####").collect();
-                    if parts.len() >= 3 {
-                        let toml_str = parts[1].trim();
-                        let markdown_content = parts[2].trim();
+            // Try to read summary.md from the series folder
+            let summary_path = format!("articles/{}/summary.md", name);
+            let (short_summary, long_summary) = match tokio::fs::read_to_string(&summary_path).await
+            {
+                Ok(content) => {
+                    // Parse TOML frontmatter and markdown content
+                    if content.starts_with("#####") {
+                        let parts: Vec<&str> = content.splitn(3, "#####").collect();
+                        if parts.len() >= 3 {
+                            let toml_str = parts[1].trim();
+                            let markdown_content = parts[2].trim();
 
-                        // Parse TOML metadata
-                        let metadata: Result<SeriesSummaryMetadata, _> = toml::from_str(toml_str);
-                        let short = metadata.ok().and_then(|m| m.short_summary);
+                            // Parse TOML metadata
+                            let metadata: Result<SeriesSummaryMetadata, _> =
+                                toml::from_str(toml_str);
+                            let short = metadata.ok().and_then(|m| m.short_summary);
 
-                        (short, Some(markdown_content.to_string()))
+                            (short, Some(markdown_content.to_string()))
+                        } else {
+                            (None, Some(content))
+                        }
                     } else {
                         (None, Some(content))
                     }
-                } else {
-                    (None, Some(content))
                 }
-            },
-            Err(_) => (None, None),
-        };
+                Err(_) => (None, None),
+            };
 
-        SeriesData {
-            name,
-            articles,
-            total_articles,
-            short_summary,
-            long_summary,
-        }
-    });
+            SeriesData {
+                name,
+                articles,
+                total_articles,
+                short_summary,
+                long_summary,
+            }
+        });
 
     let mut series_list: Vec<SeriesData> = join_all(futures).await;
 
@@ -567,8 +611,8 @@ pub async fn fetch_series_by_name(series_name: String) -> Result<SeriesData, Ser
 
             if let Some(ref metadata) = article.toml_metadata {
                 // Check if article belongs to this series
-                metadata.primary_series.as_ref() == Some(&series_name) ||
-                metadata.series.contains(&series_name)
+                metadata.primary_series.as_ref() == Some(&series_name)
+                    || metadata.series.contains(&series_name)
             } else {
                 false
             }
@@ -606,7 +650,7 @@ pub async fn fetch_series_by_name(series_name: String) -> Result<SeriesData, Ser
             } else {
                 (None, Some(content))
             }
-        },
+        }
         Err(_) => (None, None),
     };
 
