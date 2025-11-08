@@ -10,7 +10,7 @@ show_references = true
 name = "Project Management"
 next = "Project Management/02-people"
 #####
-# PLanning and Scope
+# Planning and Scope
 # The 5 Levels of Project Design
 
 Before we dive in, it's worth noting that there are roughly **three main methodologies** practiced in project management.

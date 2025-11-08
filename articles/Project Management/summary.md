@@ -1,5 +1,6 @@
 #####
 short_summary = "Software projects often fail not because of bad code, but because of poor planning and unclear structure. This series explores how project management principles — even from corporate settings — can help individual developers design and maintain cleaner, more sustainable software. Learn when (and why) to plan, what counts as a project, and how to adapt management practices for personal or open-source work."
+name = "summary"
 #####
 # **Designing and Managing Maintainable Software Projects**
 
