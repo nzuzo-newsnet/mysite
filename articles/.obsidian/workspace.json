@@ -1,0 +1,183 @@
+{
+  "main": {
+    "id": "012fea6d61a59d38",
+    "type": "split",
+    "children": [
+      {
+        "id": "ac60ab83a00b6da6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "16e5ce9226d50ab6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Project Management/05-network-analysis.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "05-network-analysis"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "7142b7938dcf7a79",
+    "type": "split",
+    "children": [
+      {
+        "id": "04ae5d92f21c94da",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "22c4a05e998238f7",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "c81beff63abb64c7",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "117ddaaf99c0eed0",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "7f69adab9529596b",
+    "type": "split",
+    "children": [
+      {
+        "id": "6ba35a27d93b97b7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "dcbf3178d3369d2e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Project Management/05-network-analysis.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for 05-network-analysis"
+            }
+          },
+          {
+            "id": "09dd2188da840cb5",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Project Management/05-network-analysis.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from 05-network-analysis"
+            }
+          },
+          {
+            "id": "b7ba218bd8cf3c91",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "f268dc8ffe9b76ea",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Project Management/05-network-analysis.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of 05-network-analysis"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "22c4a05e998238f7",
+  "lastOpenFiles": [
+    "Project Management/05-network-analysis.mdnymrWl.bck",
+    "Project Management/05-network-analysis.mdk0rVSS.bck",
+    "Project Management/05-network-analysis.mdi4La8m.bck",
+    "Project Management/05-network-analysis.mdDziPJc.bck",
+    "Project Management/05-network-analysis.mdOb9FQp.bck",
+    "Project Management/05-network-analysis.md",
+    "Project Management/05-network-analysis.md4W4BV8.bck",
+    "Project Management/05-network-analysis.mdsMNCBR.bck"
+  ]
+}
