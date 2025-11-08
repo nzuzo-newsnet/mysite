@@ -454,10 +454,11 @@ pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
 
     let results: Vec<Result<ArticleWithMetadata, ServerFnError>> = join_all(futures).await;
 
-    // Collect successful results
+    // Collect successful results and filter out summary.md files
     let articles_with_metadata: Vec<ArticleWithMetadata> = results
         .into_iter()
         .filter_map(|r| r.ok())
+        .filter(|article| article.metadata.name != "summary")
         .collect();
 
     // Group articles by series
@@ -554,11 +555,16 @@ pub async fn fetch_series_by_name(series_name: String) -> Result<SeriesData, Ser
 
     let results: Vec<Result<ArticleWithMetadata, ServerFnError>> = join_all(futures).await;
 
-    // Collect articles that belong to this series
+    // Collect articles that belong to this series and filter out summary.md
     let mut series_articles: Vec<ArticleWithMetadata> = results
         .into_iter()
         .filter_map(|r| r.ok())
         .filter(|article| {
+            // Exclude summary.md files
+            if article.metadata.name == "summary" {
+                return false;
+            }
+
             if let Some(ref metadata) = article.toml_metadata {
                 // Check if article belongs to this series
                 metadata.primary_series.as_ref() == Some(&series_name) ||
