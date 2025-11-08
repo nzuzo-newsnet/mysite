@@ -22,18 +22,18 @@ pub fn Blogs() -> Element {
     rsx! {
         article {
             class: "card card-xl h-full flex flex-col",
-            // Latest blog post (top half - 50vh)
+            // Latest blog post
             div {
-                class: "flex-1 max-h-[40vh] min-h-[40vh] overflow-hidden border-b border-base-300",
+                class: "lg:flex-1 lg:max-h-[40vh] lg:min-h-[40vh] lg:overflow-hidden lg:border-b border-base-300",
                 header {
-                    class: "card-header bg-base-100 sticky top-0 z-10",
+                    class: "card-header bg-base-100 lg:sticky top-0 z-10",
                     h2 {
                         class: "text-xl sm:text-2xl md:text-3xl card-title",
                         "Latest Blog"
                     }
                 }
                 section {
-                    class: "card-body overflow-y-auto h-[calc(50vh-5rem)]",
+                    class: "card-body lg:overflow-y-auto lg:h-[calc(50vh-5rem)]",
                     {
                         match home_data.read().as_ref() {
                             Some(Some(data)) => {
@@ -60,18 +60,18 @@ pub fn Blogs() -> Element {
                 }
             }
 
-            // Recent articles (bottom half - scrollable)
+            // Recent articles
             div {
-                class: "flex-1 max-h-[60vh] min-h-[60vh] overflow-hidden",
+                class: "lg:flex-1 lg:max-h-[60vh] lg:min-h-[60vh] lg:overflow-hidden",
                 header {
-                    class: "card-header bg-base-100 sticky top-0 z-10",
+                    class: "card-header bg-base-100 lg:sticky top-0 z-10",
                     h2 {
                         class: "text-lg sm:text-xl md:text-2xl card-title",
                         "Recent Articles"
                     }
                 }
                 section {
-                    class: "card-body overflow-y-auto h-[calc(40vh-5rem)]",
+                    class: "card-body lg:overflow-y-auto lg:h-[calc(40vh-5rem)]",
                     {
                         match home_data.read().as_ref() {
                             Some(Some(data)) => {
@@ -79,7 +79,6 @@ pub fn Blogs() -> Element {
                                 let recent_articles: Vec<ArticleWithMetadata> = data.recent_articles
                                     .iter()
                                     .skip(1)
-                                    .take(5)
                                     .cloned()
                                     .collect();
 
@@ -112,13 +111,13 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
 
     rsx! {
         div {
-            class: "space-y-4 flex md:flex-row h-full gap-3 items-center",
+            class: "space-y-4 flex flex-col h-full gap-3",
 
             // Thumbnail if available
             if let Some(ref metadata) = article.toml_metadata {
                 if let Some(ref thumbnail) = metadata.thumbnail {
                     div {
-                        class: "w-full h-32 overflow-hidden rounded-lg",
+                        class: "w-full h-48 overflow-hidden rounded-lg",
                         img {
                             src: "{thumbnail}",
                             alt: "Article thumbnail",

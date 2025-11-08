@@ -21,14 +21,14 @@ pub fn Projects() -> Element {
         article {
             class: "card card-md max-width-[30%] h-full flex flex-col",
             header {
-                class: "card-header bg-base-100 sticky top-0 z-10",
+                class: "card-header bg-base-100 lg:sticky top-0 z-10",
                 h2 {
                     class: "text-lg sm:text-xl md:text-2xl card-title",
                     "Here's what I'm working on"
                 }
             }
             section {
-                class: "card-body overflow-y-auto flex-1",
+                class: "card-body lg:overflow-y-auto flex-1",
                 match repos.value().as_ref() {
                     Some(repo_list) => rsx! {
                         if repo_list.is_empty() {
