@@ -2,7 +2,7 @@
 date = "2025-11-07"
 author = "Nzuzo Magagula"
 summary = "How should we decide what to do?"
-thumbnail = "https://postimg.cc/hJxHsYRH"
+thumbnail = "https://i.postimg.cc/pd1RWNGX/G2CM-BI108-Backlog-Images-Project-mgmt-approach-V1b.png"
 category = "Educational"
 show_references = true
 
