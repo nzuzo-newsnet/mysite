@@ -9,6 +9,7 @@ show_references = true
 [[article-series]]
 name = "Project Management"
 prev = "Project Management/02-people"
+next = "Project Management/04-project-scheduling"
 #####
 
 In the first article of this series, we briefly explored how metrics and deliverables can be used to guide and motivate project teams. In this article, we unpack metrics in a little bit more detail, understanding how to create and use them effectively.

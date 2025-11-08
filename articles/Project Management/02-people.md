@@ -11,7 +11,6 @@ name = "Project Management"
 prev = "Project Management/01-planning-and-scope"
 next = "Project Management/03-metrics"
 #####
-# Refined Article
 So far in this series, we have explored the detail of planning for projects and how we can mitigate the risks that the unpredictable nature of projects invite. In this article, we will continue to explore project management through the lens of people management.
 
 The relationship between people and projects is interesting. People are nuanced and complicated. One of the main challenges of project management is the management of (complicated) human resources so that they are able to execute and complete a (complicated) project. While there is no true prescription on how people, as individual, emotional entities, should be managed, there are ways to organize them effectively to realize a project goal.
