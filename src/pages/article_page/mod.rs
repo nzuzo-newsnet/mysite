@@ -1,27 +1,32 @@
-use dioxus::prelude::*;
+use dioxus::{logger, prelude::*};
 use dioxus_markdown::Markdown;
 
 use crate::markdown_management::{ArticleTomlMetadata, fetch_article_with_metadata};
 
 #[component]
 pub fn ArticlePage(path: String) -> Element {
-    // Reset active tab to "article" when component mounts
-    let active_tab = use_signal(|| "article".to_string());
+    let active_tab = use_signal(|| "article".to_string()); //TODO: Use enum
 
-    // Log when component mounts/remounts with new path
-    dioxus::logger::tracing::info!("ArticlePage mounted/remounted with path: {}", path);
+    logger::tracing::info!(
+        "ArticlePage component mounted/remounted with path: {}",
+        path
+    );
 
-    // Fetch article with metadata from server based on the path
-    // Since we're using a key in the parent, this will re-run when the path changes
+    // Fetch article with metadata from server
+    // Component will remount on path change due to key attribute in parent
     let article_data = use_resource(move || {
-        let current_path = path.clone();
-        dioxus::logger::tracing::info!("use_resource triggered for path: {}", current_path);
+        let path_to_fetch = path.clone();
+
         async move {
-            dioxus::logger::tracing::info!("Fetching article: {}", current_path);
-            let result = fetch_article_with_metadata(current_path.clone()).await;
+            logger::tracing::info!("Fetching article: {}", path_to_fetch);
+            let result = fetch_article_with_metadata(path_to_fetch.clone()).await;
             match &result {
-                Ok(_) => dioxus::logger::tracing::info!("Successfully fetched article: {}", current_path),
-                Err(e) => dioxus::logger::tracing::error!("Failed to fetch article {}: {:?}", current_path, e),
+                Ok(_) => {
+                    logger::tracing::info!("Successfully fetched article: {}", path_to_fetch)
+                }
+                Err(e) => {
+                    logger::tracing::error!("Failed to fetch article {}: {:?}", path_to_fetch, e)
+                }
             }
             result
         }
@@ -43,6 +48,7 @@ pub fn ArticlePage(path: String) -> Element {
                     {
                         match article_data.read().as_ref() {
                             Some(Ok(article)) => {
+                                logger::tracing::info!("Rendering article: {}", article.metadata.path);
                                 rsx! {
                                     div {
                                         class: "space-y-6",
@@ -58,7 +64,9 @@ pub fn ArticlePage(path: String) -> Element {
                                         div {
                                             class: "min-h-[500px]",
                                             match active_tab.read().as_str() {
-                                                "article" => rsx! {
+                                                "article" => {
+                                                dioxus::logger::tracing::info!("Rendering Article: {:?}", article.metadata.path);
+                                                    rsx! {
                                                     div {
                                                         class: "prose prose-lg max-w-none",
                                                         Markdown {
@@ -94,7 +102,7 @@ pub fn ArticlePage(path: String) -> Element {
                                                             }
                                                         }
                                                     }
-                                                },
+                                                }},
                                                 "references" => rsx! {
                                                     div {
                                                         class: "p-8",
@@ -251,34 +259,34 @@ fn RightSidebar(active_tab: Signal<String>, metadata: Option<ArticleTomlMetadata
                                 let series = &meta.article_series[0];
                                 rsx! {
                                     if let Some(ref prev) = series.prev {
-                                        Link {
+                                        NavigationButton {
                                             to: format!("/article/{}", prev),
                                             class: "btn btn-sm btn-outline flex-1",
-                                            "← Prev"
+                                            label: "← Prev"
                                         }
                                     }
                                     if let Some(ref next) = series.next {
-                                        Link {
+                                        NavigationButton {
                                             to: format!("/article/{}", next),
                                             class: "btn btn-sm btn-primary flex-1",
-                                            "Next →"
+                                            label: "Next →"
                                         }
                                     }
                                 }
                             }
                         } else {
                             if let Some(ref prev) = meta.prev_article {
-                                Link {
+                                NavigationButton {
                                     to: format!("/article/{}", prev),
                                     class: "btn btn-sm btn-outline flex-1",
-                                    "← Prev"
+                                    label: "← Prev"
                                 }
                             }
                             if let Some(ref next) = meta.next_article {
-                                Link {
+                                NavigationButton {
                                     to: format!("/article/{}", next),
                                     class: "btn btn-sm btn-primary flex-1",
-                                    "Next →"
+                                    label: "Next →"
                                 }
                             }
                         }
@@ -537,17 +545,17 @@ fn BottomNavPanel(active_tab: Signal<String>, metadata: Option<ArticleTomlMetada
                                 let series = &meta.article_series[0];
                                 rsx! {
                                     if let Some(ref prev) = series.prev {
-                                        Link {
+                                        NavigationButton {
                                             to: format!("/article/{}", prev),
                                             class: "btn btn-xs btn-ghost",
-                                            "← Prev"
+                                            label: "← Prev"
                                         }
                                     }
                                     if let Some(ref next) = series.next {
-                                        Link {
+                                        NavigationButton {
                                             to: format!("/article/{}", next),
                                             class: "btn btn-xs btn-ghost",
-                                            "Next →"
+                                            label: "Next →"
                                         }
                                     }
                                 }
@@ -555,17 +563,17 @@ fn BottomNavPanel(active_tab: Signal<String>, metadata: Option<ArticleTomlMetada
                         } else {
                             // Fall back to legacy fields
                             if let Some(ref prev) = meta.prev_article {
-                                Link {
+                                NavigationButton {
                                     to: format!("/article/{}", prev),
                                     class: "btn btn-xs btn-ghost",
-                                    "← Prev"
+                                    label: "← Prev"
                                 }
                             }
                             if let Some(ref next) = meta.next_article {
-                                Link {
+                                NavigationButton {
                                     to: format!("/article/{}", next),
                                     class: "btn btn-xs btn-ghost",
-                                    "Next →"
+                                    label: "Next →"
                                 }
                             }
                         }
@@ -730,33 +738,10 @@ fn NavigationCards(metadata: ArticleTomlMetadata) -> Element {
 
                 // Previous article card
                 if let Some(ref prev) = prev_path {
-                    Link {
+                    NavigationCard {
                         to: format!("/article/{}", prev),
-                        class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors",
-                        div {
-                            class: "card-body",
-                            div {
-                                class: "flex items-center gap-2 text-sm opacity-70 mb-2",
-                                svg {
-                                    xmlns: "http://www.w3.org/2000/svg",
-                                    class: "h-4 w-4",
-                                    fill: "none",
-                                    view_box: "0 0 24 24",
-                                    stroke: "currentColor",
-                                    path {
-                                        stroke_linecap: "round",
-                                        stroke_linejoin: "round",
-                                        stroke_width: "2",
-                                        d: "M15 19l-7-7 7-7"
-                                    }
-                                }
-                                span { "Previous" }
-                            }
-                            h3 {
-                                class: "card-title text-base",
-                                {prev.split('/').last().unwrap_or(prev).replace("-", " ")}
-                            }
-                        }
+                        direction: "Previous".to_string(),
+                        title: prev.split('/').last().unwrap_or(prev).replace("-", " ")
                     }
                 } else {
                     // Empty placeholder for grid alignment
@@ -765,34 +750,101 @@ fn NavigationCards(metadata: ArticleTomlMetadata) -> Element {
 
                 // Next article card
                 if let Some(ref next) = next_path {
-                    Link {
+                    NavigationCard {
                         to: format!("/article/{}", next),
-                        class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors",
-                        div {
-                            class: "card-body",
-                            div {
-                                class: "flex items-center justify-end gap-2 text-sm opacity-70 mb-2",
-                                span { "Next" }
-                                svg {
-                                    xmlns: "http://www.w3.org/2000/svg",
-                                    class: "h-4 w-4",
-                                    fill: "none",
-                                    view_box: "0 0 24 24",
-                                    stroke: "currentColor",
-                                    path {
-                                        stroke_linecap: "round",
-                                        stroke_linejoin: "round",
-                                        stroke_width: "2",
-                                        d: "M9 5l7 7-7 7"
-                                    }
-                                }
-                            }
-                            h3 {
-                                class: "card-title text-base text-right",
-                                {next.split('/').last().unwrap_or(next).replace("-", " ")}
+                        direction: "next".to_string(),
+                        title: next.split('/').last().unwrap_or(next).replace("-", " ")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Navigation button that uses programmatic navigation
+#[component]
+fn NavigationButton(to: String, class: String, label: String) -> Element {
+    let nav = use_navigator();
+
+    rsx! {
+        button {
+            class: "{class}",
+            onclick: move |_| {
+                logger::tracing::info!("Navigating to: {}", to);
+                // Parse the path and navigate using the Route enum
+                // to="/article/path/to/file" -> segments = ["path", "to", "file"]
+                if let Some(path) = to.strip_prefix("/article/") {
+                    let segments: Vec<String> = path.split('/').map(|s| s.to_string()).collect();
+                    logger::tracing::info!("Navigation segments: {:?}", segments);
+                    nav.push(crate::Route::Article { segments });
+                } else {
+                    nav.push(to.clone());
+                }
+            },
+            "{label}"
+        }
+    }
+}
+
+/// Navigation card for prev/next article navigation
+#[component]
+fn NavigationCard(to: String, direction: String, title: String) -> Element {
+    let nav = use_navigator();
+    let is_next = direction == "next";
+
+    rsx! {
+        div {
+            class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors cursor-pointer",
+            onclick: move |_| {
+                logger::tracing::info!("Navigating to: {}", to);
+                // Parse the path and navigate using the Route enum
+                if let Some(path) = to.strip_prefix("/article/") {
+                    let segments: Vec<String> = path.split('/').map(|s| s.to_string()).collect();
+                    logger::tracing::info!("Navigation segments: {:?}", segments);
+                    nav.push(crate::Route::Article { segments });
+                } else {
+                    nav.push(to.clone());
+                }
+            },
+            div {
+                class: "card-body",
+                div {
+                    class: if is_next { "flex items-center justify-end gap-2 text-sm opacity-70 mb-2" } else { "flex items-center gap-2 text-sm opacity-70 mb-2" },
+                    if !is_next {
+                        svg {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            class: "h-4 w-4",
+                            fill: "none",
+                            view_box: "0 0 24 24",
+                            stroke: "currentColor",
+                            path {
+                                stroke_linecap: "round",
+                                stroke_linejoin: "round",
+                                stroke_width: "2",
+                                d: "M15 19l-7-7 7-7"
                             }
                         }
                     }
+                    span { "{direction}" }
+                    if is_next {
+                        svg {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            class: "h-4 w-4",
+                            fill: "none",
+                            view_box: "0 0 24 24",
+                            stroke: "currentColor",
+                            path {
+                                stroke_linecap: "round",
+                                stroke_linejoin: "round",
+                                stroke_width: "2",
+                                d: "M9 5l7 7-7 7"
+                            }
+                        }
+                    }
+                }
+                h3 {
+                    class: if is_next { "card-title text-base text-right" } else { "card-title text-base" },
+                    "{title}"
                 }
             }
         }

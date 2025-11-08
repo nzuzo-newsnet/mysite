@@ -92,10 +92,10 @@ fn Article(segments: Vec<String>) -> Element {
         div {
             class: "h-dvh flex flex-col overflow-hidden",
             NavBar {}
-            // Use key to force component recreation when path changes
-            // The key must be a unique value that changes with the path
+            // Use key to force component remount on path change
+            // This ensures all hooks re-initialize with the new path
             pages::article_page::ArticlePage {
-                key: full_path.clone(),
+                key: "{full_path}",
                 path: full_path
             }
         }
