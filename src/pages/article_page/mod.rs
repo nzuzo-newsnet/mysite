@@ -5,28 +5,50 @@ use crate::markdown_management::{ArticleTomlMetadata, fetch_article_with_metadat
 
 #[component]
 pub fn ArticlePage(path: String) -> Element {
-    let article_path = path.clone();
     let active_tab = use_signal(|| "article".to_string());
 
+    // Log when component receives new path prop
+    dioxus::logger::tracing::info!("ArticlePage rendered with path: {}", path);
+
+    // Create a memo to make the path reactive
+    let path_memo = use_memo(move || {
+        let p = path.clone();
+        dioxus::logger::tracing::info!("path_memo computed: {}", p);
+        p
+    });
+
     // Fetch article with metadata from server based on the path
+    // The resource will restart whenever path_memo changes
     let article_data = use_resource(move || {
-        let path = article_path.clone();
-        async move { fetch_article_with_metadata(path).await }
+        let path = path_memo();
+        dioxus::logger::tracing::info!("use_resource triggered for path: {}", path);
+        async move {
+            dioxus::logger::tracing::info!("Fetching article: {}", path);
+            let result = fetch_article_with_metadata(path.clone()).await;
+            match &result {
+                Ok(_) => dioxus::logger::tracing::info!("Successfully fetched article: {}", path),
+                Err(e) => dioxus::logger::tracing::error!("Failed to fetch article {}: {:?}", path, e),
+            }
+            result
+        }
     });
 
     rsx! {
         main {
-            class: "flex-1 overflow-y-auto p-8 pb-32",
+            class: "flex-1 overflow-hidden flex flex-col md:flex-row",
+
+            // Main content area
             div {
-                class: "container mx-auto max-w-4xl",
-            article {
-                class: "card card-xl",
-                section {
-                    class: "card-body",
+                class: "flex-1 overflow-y-auto p-4 md:p-8 pb-32 md:pb-8",
+                div {
+                    class: "container mx-auto max-w-4xl",
+                article {
+                    class: "card card-xl",
+                    section {
+                        class: "card-body",
                     {
                         match article_data.read().as_ref() {
                             Some(Ok(article)) => {
-                                let metadata = article.toml_metadata.clone();
                                 rsx! {
                                     div {
                                         class: "space-y-6",
@@ -47,6 +69,13 @@ pub fn ArticlePage(path: String) -> Element {
                                                         class: "prose prose-lg max-w-none",
                                                         Markdown {
                                                             content: article.content.clone(),
+                                                        }
+                                                    }
+
+                                                    // Next/Previous Navigation Cards
+                                                    if let Some(ref meta) = article.toml_metadata {
+                                                        NavigationCards {
+                                                            metadata: meta.clone()
                                                         }
                                                     }
 
@@ -133,12 +162,6 @@ pub fn ArticlePage(path: String) -> Element {
                                             }
                                         }
                                     }
-
-                                    // Bottom Navigation Panel (Floating & Sticky)
-                                    BottomNavPanel {
-                                        active_tab: active_tab,
-                                        metadata: metadata
-                                    }
                                 }
                             },
                             Some(Err(e)) => rsx! {
@@ -155,6 +178,194 @@ pub fn ArticlePage(path: String) -> Element {
                     }
                 }
             }
+                }
+            }
+
+            // Right sidebar for md+ screens with tabs
+            {
+                if let Some(Ok(article)) = article_data.read().as_ref() {
+                    rsx! {
+                        div {
+                            class: "hidden md:block md:w-80 lg:w-96 border-l border-base-300 bg-base-100 overflow-y-auto",
+                            RightSidebar {
+                                active_tab: active_tab,
+                                metadata: article.toml_metadata.clone()
+                            }
+                        }
+                    }
+                } else {
+                    rsx! {}
+                }
+            }
+
+            // Bottom Navigation Panel for mobile only
+            {
+                if let Some(Ok(article)) = article_data.read().as_ref() {
+                    rsx! {
+                        div {
+                            class: "md:hidden",
+                            BottomNavPanel {
+                                active_tab: active_tab,
+                                metadata: article.toml_metadata.clone()
+                            }
+                        }
+                    }
+                } else {
+                    rsx! {}
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn RightSidebar(active_tab: Signal<String>, metadata: Option<ArticleTomlMetadata>) -> Element {
+    rsx! {
+        div {
+            class: "flex flex-col h-full",
+
+            // Navigation section at top
+            if let Some(ref meta) = metadata {
+                div {
+                    class: "p-4 border-b border-base-300",
+                    h3 {
+                        class: "text-sm font-semibold mb-3 opacity-70",
+                        "Navigate"
+                    }
+
+                    // Series info
+                    if !meta.article_series.is_empty() {
+                        {
+                            let series = &meta.article_series[0];
+                            rsx! {
+                                div {
+                                    class: "mb-3",
+                                    span {
+                                        class: "badge badge-sm badge-primary",
+                                        "{series.name}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Prev/Next buttons
+                    div {
+                        class: "flex gap-2",
+                        if !meta.article_series.is_empty() {
+                            {
+                                let series = &meta.article_series[0];
+                                rsx! {
+                                    if let Some(ref prev) = series.prev {
+                                        Link {
+                                            to: format!("/article/{}", prev),
+                                            class: "btn btn-sm btn-outline flex-1",
+                                            "← Prev"
+                                        }
+                                    }
+                                    if let Some(ref next) = series.next {
+                                        Link {
+                                            to: format!("/article/{}", next),
+                                            class: "btn btn-sm btn-primary flex-1",
+                                            "Next →"
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            if let Some(ref prev) = meta.prev_article {
+                                Link {
+                                    to: format!("/article/{}", prev),
+                                    class: "btn btn-sm btn-outline flex-1",
+                                    "← Prev"
+                                }
+                            }
+                            if let Some(ref next) = meta.next_article {
+                                Link {
+                                    to: format!("/article/{}", next),
+                                    class: "btn btn-sm btn-primary flex-1",
+                                    "Next →"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Tabs section
+            div {
+                class: "flex-1 p-4",
+                h3 {
+                    class: "text-sm font-semibold mb-3 opacity-70",
+                    "Sections"
+                }
+
+                div {
+                    class: "flex flex-col gap-2",
+
+                    // Article tab
+                    button {
+                        class: if active_tab.read().as_str() == "article" {
+                            "btn btn-sm btn-primary justify-start"
+                        } else {
+                            "btn btn-sm btn-ghost justify-start"
+                        },
+                        onclick: move |_| active_tab.set("article".to_string()),
+                        "📄 Article"
+                    }
+
+                    // References tab
+                    if metadata.as_ref().map(|m| m.show_references).unwrap_or(true) {
+                        button {
+                            class: if active_tab.read().as_str() == "references" {
+                                "btn btn-sm btn-primary justify-start"
+                            } else {
+                                "btn btn-sm btn-ghost justify-start"
+                            },
+                            onclick: move |_| active_tab.set("references".to_string()),
+                            "📚 References"
+                        }
+                    }
+
+                    // Demo tab
+                    if metadata.as_ref().map(|m| m.show_demo).unwrap_or(false) {
+                        button {
+                            class: if active_tab.read().as_str() == "demo" {
+                                "btn btn-sm btn-primary justify-start"
+                            } else {
+                                "btn btn-sm btn-ghost justify-start"
+                            },
+                            onclick: move |_| active_tab.set("demo".to_string()),
+                            "▶️ Demo"
+                        }
+                    }
+
+                    // Related tab
+                    if metadata.as_ref().map(|m| m.show_related).unwrap_or(false) {
+                        button {
+                            class: if active_tab.read().as_str() == "related" {
+                                "btn btn-sm btn-primary justify-start"
+                            } else {
+                                "btn btn-sm btn-ghost justify-start"
+                            },
+                            onclick: move |_| active_tab.set("related".to_string()),
+                            "⚡ Related"
+                        }
+                    }
+
+                    // Quiz tab
+                    if metadata.as_ref().map(|m| m.show_quiz).unwrap_or(false) {
+                        button {
+                            class: if active_tab.read().as_str() == "quiz" {
+                                "btn btn-sm btn-primary justify-start"
+                            } else {
+                                "btn btn-sm btn-ghost justify-start"
+                            },
+                            onclick: move |_| active_tab.set("quiz".to_string()),
+                            "✓ Quiz"
+                        }
+                    }
+                }
             }
         }
     }
@@ -475,6 +686,118 @@ fn BottomNavPanel(active_tab: Signal<String>, metadata: Option<ArticleTomlMetada
                     span {
                         class: "dock-label",
                         "Quiz"
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn NavigationCards(metadata: ArticleTomlMetadata) -> Element {
+    // Determine prev and next from article_series or legacy fields
+    let (prev_path, next_path, series_name) = if !metadata.article_series.is_empty() {
+        let series = &metadata.article_series[0];
+        (
+            series.prev.clone(),
+            series.next.clone(),
+            Some(series.name.clone()),
+        )
+    } else {
+        (
+            metadata.prev_article.clone(),
+            metadata.next_article.clone(),
+            metadata.primary_series.clone(),
+        )
+    };
+
+    // Only render if there's at least one navigation link
+    if prev_path.is_none() && next_path.is_none() {
+        return rsx! {};
+    }
+
+    rsx! {
+        div {
+            class: "border-t border-base-300 pt-8 mt-8",
+
+            // Series name badge if available
+            if let Some(ref series) = series_name {
+                div {
+                    class: "mb-4",
+                    span {
+                        class: "badge badge-primary badge-lg",
+                        "{series}"
+                    }
+                }
+            }
+
+            div {
+                class: "grid grid-cols-1 md:grid-cols-2 gap-4",
+
+                // Previous article card
+                if let Some(ref prev) = prev_path {
+                    Link {
+                        to: format!("/article/{}", prev),
+                        class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors",
+                        div {
+                            class: "card-body",
+                            div {
+                                class: "flex items-center gap-2 text-sm opacity-70 mb-2",
+                                svg {
+                                    xmlns: "http://www.w3.org/2000/svg",
+                                    class: "h-4 w-4",
+                                    fill: "none",
+                                    view_box: "0 0 24 24",
+                                    stroke: "currentColor",
+                                    path {
+                                        stroke_linecap: "round",
+                                        stroke_linejoin: "round",
+                                        stroke_width: "2",
+                                        d: "M15 19l-7-7 7-7"
+                                    }
+                                }
+                                span { "Previous" }
+                            }
+                            h3 {
+                                class: "card-title text-base",
+                                {prev.split('/').last().unwrap_or(prev).replace("-", " ")}
+                            }
+                        }
+                    }
+                } else {
+                    // Empty placeholder for grid alignment
+                    div {}
+                }
+
+                // Next article card
+                if let Some(ref next) = next_path {
+                    Link {
+                        to: format!("/article/{}", next),
+                        class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors",
+                        div {
+                            class: "card-body",
+                            div {
+                                class: "flex items-center justify-end gap-2 text-sm opacity-70 mb-2",
+                                span { "Next" }
+                                svg {
+                                    xmlns: "http://www.w3.org/2000/svg",
+                                    class: "h-4 w-4",
+                                    fill: "none",
+                                    view_box: "0 0 24 24",
+                                    stroke: "currentColor",
+                                    path {
+                                        stroke_linecap: "round",
+                                        stroke_linejoin: "round",
+                                        stroke_width: "2",
+                                        d: "M9 5l7 7-7 7"
+                                    }
+                                }
+                            }
+                            h3 {
+                                class: "card-title text-base text-right",
+                                {next.split('/').last().unwrap_or(next).replace("-", " ")}
+                            }
+                        }
                     }
                 }
             }

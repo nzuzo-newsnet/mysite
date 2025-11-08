@@ -288,7 +288,7 @@ pub async fn fetch_article_content(path: String) -> Result<String, ServerFnError
 /// Fetch article with full metadata and processed content
 #[server]
 #[cached::proc_macro::cached(
-    time = 3600,
+    time = 60,
     result = true,
     sync_writes = true,
     key = "String",

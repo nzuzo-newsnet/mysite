@@ -6,7 +6,7 @@ thumbnail = "https://i.postimg.cc/pd1RWNGX/G2CM-BI108-Backlog-Images-Project-mgm
 category = "Educational"
 show_references = true
 
-[[article-series]]
+[[article_series]]
 name = "Project Management"
 prev = "Project Management/02-people"
 next = "Project Management/04-project-scheduling"
