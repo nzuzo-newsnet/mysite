@@ -75,12 +75,19 @@ fn Article(segments: Vec<String>) -> Element {
     // Join segments to form the path (e.g., ["data-engineering", "01-pipeline-basics"] -> "data-engineering/01-pipeline-basics")
     let path = segments.join("/");
 
+    // Log the route segments
+    logger::tracing::info!("Article route called with segments: {:?}, path: {}", segments, path);
+
+    let full_path = format!("{}.md", path);
+
     rsx! {
         div {
             class: "h-dvh flex flex-col overflow-hidden",
             NavBar {}
+            // Use key to force component recreation when path changes
             pages::article_page::ArticlePage {
-                path: format!("{}.md", path)
+                key: "{full_path}",
+                path: full_path
             }
         }
     }

@@ -19,16 +19,16 @@ pub fn Projects() -> Element {
 
     rsx! {
         article {
-            class: "card card-md max-width-[30%] h-full flex flex-col",
+            class: "h-full flex flex-col",
             header {
-                class: "card-header bg-base-100 lg:sticky top-0 z-10",
+                class: "p-4 bg-base-100 border-b border-base-300 md:sticky top-0 z-10",
                 h2 {
-                    class: "text-lg sm:text-xl md:text-2xl card-title",
+                    class: "text-lg md:text-xl font-bold",
                     "Here's what I'm working on"
                 }
             }
             section {
-                class: "card-body lg:overflow-y-auto flex-1",
+                class: "p-4 overflow-y-auto flex-1",
                 match repos.value().as_ref() {
                     Some(repo_list) => rsx! {
                         if repo_list.is_empty() {
@@ -50,9 +50,9 @@ pub fn Projects() -> Element {
                 }
             }
             footer {
-                class: "card-footer bg-base-100 sticky bottom-0",
+                class: "p-4 bg-base-100 border-t border-base-300 md:sticky bottom-0",
                 button {
-                    class: "btn btn-primary w-full",
+                    class: "btn btn-sm btn-primary w-full",
                     onclick: move |_| repos.restart(),
                     "Refresh"
                 }

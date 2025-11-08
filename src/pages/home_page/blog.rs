@@ -71,7 +71,7 @@ pub fn Blogs() -> Element {
                     }
                 }
                 section {
-                    class: "card-body lg:overflow-y-auto lg:h-[calc(40vh-5rem)]",
+                    class: "card-body h-full lg:overflow-y-auto lg:h-[calc(40vh-5rem)]",
                     {
                         match home_data.read().as_ref() {
                             Some(Some(data)) => {
@@ -84,7 +84,7 @@ pub fn Blogs() -> Element {
 
                                 rsx! {
                                     div {
-                                        class: "grid grid-cols-1 md:grid-cols-2 gap-4",
+                                        class: "grid grid-cols-1 md:flex md:flex-row gap-4",
                                         for article in recent_articles {
                                             ArticleSummaryCard {
                                                 article: article.clone()
