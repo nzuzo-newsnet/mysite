@@ -10,3 +10,5 @@ show_references = true
 name = "Project Management"
 prev = "Project Management/03-metrics"
 #####
+
+Project scheduling activites aim to divide work and conquer. The main three activities involved in a project schedule
