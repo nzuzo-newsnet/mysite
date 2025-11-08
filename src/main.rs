@@ -83,10 +83,13 @@ fn Article(segments: Vec<String>) -> Element {
     // Join segments to form the path (e.g., ["data-engineering", "01-pipeline-basics"] -> "data-engineering/01-pipeline-basics")
     let path = segments.join("/");
 
-    // Log the route segments
-    logger::tracing::info!("Article route called with segments: {:?}, path: {}", segments, path);
+    // Log the route segments - this should print EVERY time the route changes
+    logger::tracing::info!("Article component rendered with segments: {:?}, path: {}", segments, path);
 
     let full_path = format!("{}.md", path);
+
+    // Log the key being used
+    logger::tracing::info!("Using key for ArticlePage: {}", full_path);
 
     rsx! {
         div {
@@ -95,7 +98,7 @@ fn Article(segments: Vec<String>) -> Element {
             // Use key to force component remount on path change
             // This ensures all hooks re-initialize with the new path
             pages::article_page::ArticlePage {
-                key: "{full_path}",
+                key: full_path.clone(),
                 path: full_path
             }
         }

@@ -12,10 +12,19 @@ pub fn ArticlePage(path: String) -> Element {
         path
     );
 
+    // Store path in a signal to make it explicitly reactive
+    let mut current_path = use_signal(|| path.clone());
+
+    // Update the signal if the path prop changes (redundant when using key, but safe)
+    use_effect(move || {
+        logger::tracing::info!("Path effect triggered, updating to: {}", path);
+        current_path.set(path.clone());
+    });
+
     // Fetch article with metadata from server
-    // Component will remount on path change due to key attribute in parent
+    // Resource will restart when current_path signal changes
     let article_data = use_resource(move || {
-        let path_to_fetch = path.clone();
+        let path_to_fetch = current_path();
 
         async move {
             logger::tracing::info!("Fetching article: {}", path_to_fetch);
@@ -761,26 +770,13 @@ fn NavigationCards(metadata: ArticleTomlMetadata) -> Element {
     }
 }
 
-/// Navigation button that uses programmatic navigation
+/// Navigation button using Link component for proper reactivity
 #[component]
 fn NavigationButton(to: String, class: String, label: String) -> Element {
-    let nav = use_navigator();
-
     rsx! {
-        button {
+        Link {
+            to: to,
             class: "{class}",
-            onclick: move |_| {
-                logger::tracing::info!("Navigating to: {}", to);
-                // Parse the path and navigate using the Route enum
-                // to="/article/path/to/file" -> segments = ["path", "to", "file"]
-                if let Some(path) = to.strip_prefix("/article/") {
-                    let segments: Vec<String> = path.split('/').map(|s| s.to_string()).collect();
-                    logger::tracing::info!("Navigation segments: {:?}", segments);
-                    nav.push(crate::Route::Article { segments });
-                } else {
-                    nav.push(to.clone());
-                }
-            },
             "{label}"
         }
     }
@@ -789,23 +785,12 @@ fn NavigationButton(to: String, class: String, label: String) -> Element {
 /// Navigation card for prev/next article navigation
 #[component]
 fn NavigationCard(to: String, direction: String, title: String) -> Element {
-    let nav = use_navigator();
     let is_next = direction == "next";
 
     rsx! {
-        div {
-            class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors cursor-pointer",
-            onclick: move |_| {
-                logger::tracing::info!("Navigating to: {}", to);
-                // Parse the path and navigate using the Route enum
-                if let Some(path) = to.strip_prefix("/article/") {
-                    let segments: Vec<String> = path.split('/').map(|s| s.to_string()).collect();
-                    logger::tracing::info!("Navigation segments: {:?}", segments);
-                    nav.push(crate::Route::Article { segments });
-                } else {
-                    nav.push(to.clone());
-                }
-            },
+        Link {
+            to: to,
+            class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors",
             div {
                 class: "card-body",
                 div {
