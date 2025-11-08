@@ -91,14 +91,51 @@ Processes can be *outputs* of projects (for example, creating an automated testi
 
 ### **Key Differences Between Projects and Processes**
 
-| **Property**                     | **Project**                                              | **Process**                                     | **Consequence**                                                                                  |
-| -------------------------------- | -------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **Initiation**                   | Created ad hoc for a specific purpose; executed once.    | Routine; designed to repeat indefinitely.       | Projects focus on achieving a specific outcome; processes prioritize consistency and efficiency. |
-| **Duration**                     | Has one start and one end date (though these may shift). | Runs continuously or cyclically.                | Projects require flexible goals; processes thrive on predictability.                             |
-| **Pre/Postconditions and Tasks** | Often uncertain or exploratory.                          | Well-documented and predictable.                | Processes are easier to onboard new people into; projects require deeper context.                |
-| **Success Rate**                 | Typically lower; failures are common and instructive.    | Improves through iteration and standardization. | Processes mature through lessons learned from projects.                                          |
-| **Change Scope**                 | Large; can redefine goals or outputs entirely.           | Small; focuses on refining execution.           | Projects evolve rapidly, while processes stabilize over time.                                    |
-| **Metrics**                      | Measured by **output quality** and goal fulfillment.     | Measured by **efficiency** and consistency.     | Inefficient processes compound costs; projects conclude and reset.                               |
+**1. Initiation**
+
+* **Project:** Created ad hoc for a specific purpose; executed once.
+* **Process:** Routine; designed to repeat indefinitely.
+* **Consequence:** Projects focus on achieving a specific outcome, while processes prioritize consistency and efficiency.
+
+---
+
+**2. Duration**
+
+* **Project:** Has one start and one end date (though these may shift).
+* **Process:** Runs continuously or cyclically.
+* **Consequence:** Projects require flexible goals; processes thrive on predictability.
+
+---
+
+**3. Preconditions and Tasks**
+
+* **Project:** Often uncertain or exploratory.
+* **Process:** Well-documented and predictable.
+* **Consequence:** Processes are easier to onboard new people into, while projects require deeper context.
+
+---
+
+**4. Success Rate**
+
+* **Project:** Typically lower; failures are common and instructive.
+* **Process:** Improves through iteration and standardization.
+* **Consequence:** Processes mature through lessons learned from projects.
+
+---
+
+**5. Change Scope**
+
+* **Project:** Large; can redefine goals or outputs entirely.
+* **Process:** Small; focuses on refining execution.
+* **Consequence:** Projects evolve rapidly, while processes stabilize over time.
+
+---
+
+**6. Metrics**
+
+* **Project:** Measured by **output quality** and goal fulfillment.
+* **Process:** Measured by **efficiency** and consistency.
+* **Consequence:** Inefficient processes compound costs, while projects conclude and reset.
 
 ---
 
