@@ -5,29 +5,23 @@ use crate::markdown_management::{ArticleTomlMetadata, fetch_article_with_metadat
 
 #[component]
 pub fn ArticlePage(path: String) -> Element {
+    // Reset active tab to "article" when component mounts
     let active_tab = use_signal(|| "article".to_string());
 
-    // Log when component receives new path prop
-    dioxus::logger::tracing::info!("ArticlePage rendered with path: {}", path);
-
-    // Create a memo to make the path reactive
-    let path_memo = use_memo(move || {
-        let p = path.clone();
-        dioxus::logger::tracing::info!("path_memo computed: {}", p);
-        p
-    });
+    // Log when component mounts/remounts with new path
+    dioxus::logger::tracing::info!("ArticlePage mounted/remounted with path: {}", path);
 
     // Fetch article with metadata from server based on the path
-    // The resource will restart whenever path_memo changes
+    // Since we're using a key in the parent, this will re-run when the path changes
     let article_data = use_resource(move || {
-        let path = path_memo();
-        dioxus::logger::tracing::info!("use_resource triggered for path: {}", path);
+        let current_path = path.clone();
+        dioxus::logger::tracing::info!("use_resource triggered for path: {}", current_path);
         async move {
-            dioxus::logger::tracing::info!("Fetching article: {}", path);
-            let result = fetch_article_with_metadata(path.clone()).await;
+            dioxus::logger::tracing::info!("Fetching article: {}", current_path);
+            let result = fetch_article_with_metadata(current_path.clone()).await;
             match &result {
-                Ok(_) => dioxus::logger::tracing::info!("Successfully fetched article: {}", path),
-                Err(e) => dioxus::logger::tracing::error!("Failed to fetch article {}: {:?}", path, e),
+                Ok(_) => dioxus::logger::tracing::info!("Successfully fetched article: {}", current_path),
+                Err(e) => dioxus::logger::tracing::error!("Failed to fetch article {}: {:?}", current_path, e),
             }
             result
         }
