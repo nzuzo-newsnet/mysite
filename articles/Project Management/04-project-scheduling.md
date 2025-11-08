@@ -9,6 +9,7 @@ show_references = true
 [[article-series]]
 name = "Project Management"
 prev = "Project Management/03-metrics"
+next = "Project Management/05-network-analysis"
 #####
 # The Project Scheduling Process
 
