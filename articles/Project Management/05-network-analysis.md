@@ -90,13 +90,49 @@ By the end, you should have a complete forward pass:
 [![Complete-Net-drawio.jpg](https://i.postimg.cc/MTFXBvz5/Complete-Net-drawio.jpg)](https://postimg.cc/VrXYQsr0)
 
 #### Step 3: Backwward Pass
+The values calculated here are calculating the time that a task **absolutely needs to be completed** without delaying the project.
 This process is essentially the same in reverse where:
 
 The latest start of a node is the highest finish of all preceding nodes:
-$Latest Start (LS) = LF(next) - ED(self)$
+$Latest Start (LS) = LF(self) - ED(self)$
 
 The latest finish of a node is it's own latest start, plus it's own estimate:
 $Latest Finish (LF) = min(LS(next))$
 
 For the backward pass, you start with the *last* node(s) and fill the network.
-For node 6, the 
+For node 6, the numbers are the same as in the forward pass as there is no LS(next):
+[![Act6back-drawio.jpg](https://i.postimg.cc/FFcXQ72z/Act6back-drawio.jpg)](https://postimg.cc/XXVzf7N6)
+
+By the end of the backward pass, you should have a graph that looks like this:
+[![Complete-Back-drawio.jpg](https://i.postimg.cc/d1hk08Gg/Complete-Back-drawio.jpg)](https://postimg.cc/R6zVsJsT)
+
+#### Step 4: Total Float
+Total float is the time that an activity can be delayed without affecting completion date.
+If the forward/backward passes informs us of *when* a task should start, total float informs us of *how much extra time* a task can be delayed, without affecting any other activity.
+By this point, you already have the necessary values to begin. Float time is just a quick way of showing us the delta between earliest and latest start at a glance.
+
+Total float is defined by:
+$TF (self) = LS (self) – ES (self)$
+
+[![Float-drawio.jpg](https://i.postimg.cc/vT9v4R5L/Float-drawio.jpg)](https://postimg.cc/zHzhQctV)
+
+#### Step 5: Free Float
+Similarily, free float is the amount of extra time that a project can be extended without delaying the start of finish of any other activity
+If the forward/backward passes informs us of *when* a task should start, free float informs us of *how much extra time* a task can take up, without affecting any other activity.
+This is a useful metric to use as an early indicator of slippage. If you are working on a task, you may encounter issues that you did not forsee, and this value may help you see if the time taken to solve the issue, and complete the task is feasible.
+
+The calculation is the same as the total float calculation, but for the **end** times:
+$TF (self) = min(ES (next)) – EF (self)$
+
+[![Complete-drawio.jpg](https://i.postimg.cc/D0DtTKnq/Complete-drawio.jpg)](https://postimg.cc/4H686qKd)
+
+#### Step 6: Critical Path
+For this section, it is important to pay attention to the semantics of the equations and what they mean. You need to understand *what, when and why* you are delaying.
+For example, when a decision is made to delay Activity 3, if activity 3 has started, then you can only delay the end time, and the maximum time you can delay the end time for that activity is the free float. In this instance, your delay is because *Acticity 3* is taking longer than usual.
+Here, you are delaying your current task (Free float).
+If you instead need to delay task 3 because task 2 is running over time (assume that nodes 4 and 5 did not exist), then you would need to delay the *start* time of task 3 and extend the *end* time of task 2.
+This intuition is helpful when trying to understand critical path.
+The critical path is the string of activities that **cannot** be delayed at all. In the above example, our critical path would be 1, 2, 4, 5, 6 because both their free floats and total floats are 0.
+
+[![Critical-path-drawio.jpg](https://i.postimg.cc/T2DwK25Z/Critical-path-drawio.jpg)](https://postimg.cc/JtRmgLqq)
+
