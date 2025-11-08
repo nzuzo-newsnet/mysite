@@ -30,6 +30,14 @@ enum Route {
 }
 
 fn main() {
+    // Initialize article watcher on server startup
+    #[cfg(feature = "server")]
+    {
+        if let Err(e) = markdown_management::start_article_watcher() {
+            logger::tracing::error!("Failed to start article watcher: {}", e);
+        }
+    }
+
     dioxus::launch(App);
 }
 
@@ -85,8 +93,9 @@ fn Article(segments: Vec<String>) -> Element {
             class: "h-dvh flex flex-col overflow-hidden",
             NavBar {}
             // Use key to force component recreation when path changes
+            // The key must be a unique value that changes with the path
             pages::article_page::ArticlePage {
-                key: "{full_path}",
+                key: full_path.clone(),
                 path: full_path
             }
         }

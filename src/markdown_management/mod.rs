@@ -4,6 +4,9 @@ pub mod github;
 #[cfg(feature = "web")]
 pub mod github_cache;
 
+#[cfg(feature = "server")]
+pub mod watcher;
+
 pub use local::{
     list_files,
     fetch_article_content,
@@ -23,3 +26,6 @@ pub use local::{
     SeriesData,
 };
 pub use github::{fetch_github_repos, GitHubRepo};
+
+#[cfg(feature = "server")]
+pub use watcher::start_article_watcher;

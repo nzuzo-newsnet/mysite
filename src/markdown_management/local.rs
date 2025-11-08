@@ -213,11 +213,10 @@ fn extract_series_from_path(path: &std::path::Path, base_dir: &str) -> Option<St
 
 /// List all available article files (server-side)
 #[server]
-#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+#[cached::proc_macro::cached(time = 5, result = true, sync_writes = true)]
 pub async fn list_files() -> Result<Vec<ArticleMetadata>, ServerFnError> {
     use futures::future::join_all;
-    use std::path::{Path, PathBuf};
-    use tokio::fs;
+    use std::path::Path;
 
     let articles_dir = "articles";
     let base_path = Path::new(articles_dir);
@@ -265,7 +264,7 @@ pub async fn list_files() -> Result<Vec<ArticleMetadata>, ServerFnError> {
 /// Fetch article content from the filesystem (server-side)
 #[server]
 #[cached::proc_macro::cached(
-    time = 3600,
+    time = 5,
     result = true,
     sync_writes = true,
     key = "String",
@@ -288,7 +287,7 @@ pub async fn fetch_article_content(path: String) -> Result<String, ServerFnError
 /// Fetch article with full metadata and processed content
 #[server]
 #[cached::proc_macro::cached(
-    time = 60,
+    time = 5,
     result = true,
     sync_writes = true,
     key = "String",
@@ -348,7 +347,7 @@ pub async fn fetch_article_with_metadata(
 /// Fetch article content by name (without extension)
 #[server]
 #[cached::proc_macro::cached(
-    time = 3600,
+    time = 5,
     result = true,
     sync_writes = true,
     key = "String",
@@ -374,7 +373,7 @@ pub struct HomePageDataWithMetadata {
 
 /// Fetch home page data (articles list + first article content) in a single call
 #[server]
-#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+#[cached::proc_macro::cached(time = 5, result = true, sync_writes = true)]
 pub async fn fetch_home_page_data() -> Result<HomePageData, ServerFnError> {
     // Fetch articles list (cached)
     let articles = list_files().await?;
@@ -394,7 +393,7 @@ pub async fn fetch_home_page_data() -> Result<HomePageData, ServerFnError> {
 
 /// Fetch home page data with metadata for all articles
 #[server]
-#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+#[cached::proc_macro::cached(time = 5, result = true, sync_writes = true)]
 pub async fn fetch_home_page_data_with_metadata() -> Result<HomePageDataWithMetadata, ServerFnError>
 {
     use futures::future::join_all;
@@ -473,7 +472,7 @@ pub struct SeriesData {
 
 /// Fetch all series with their articles
 #[server]
-#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+#[cached::proc_macro::cached(time = 5, result = true, sync_writes = true)]
 pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
     use futures::future::join_all;
     use std::collections::HashMap;
@@ -582,7 +581,13 @@ pub async fn fetch_all_series() -> Result<Vec<SeriesData>, ServerFnError> {
 
 /// Fetch a single series by name
 #[server]
-#[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]
+#[cached::proc_macro::cached(
+    time = 5,
+    result = true,
+    sync_writes = true,
+    key = "String",
+    convert = r#"{ series_name.clone() }"#
+)]
 pub async fn fetch_series_by_name(series_name: String) -> Result<SeriesData, ServerFnError> {
     use futures::future::join_all;
 
