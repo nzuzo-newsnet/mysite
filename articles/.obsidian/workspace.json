@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Project Management/05-network-analysis.md",
+                "file": "netabase_store/02-procedural-macros-and-code-generation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "05-network-analysis"
+              "title": "02-procedural-macros-and-code-generation"
             }
           }
         ]
@@ -171,17 +171,19 @@
   },
   "active": "16e5ce9226d50ab6",
   "lastOpenFiles": [
-    "Project Management/05-network-analysis.mdkqSnBA.bck",
-    "Project Management/05-network-analysis.mdQBOSBC.bck",
-    "Project Management/05-network-analysis.md2djigm.bck",
-    "Project Management/05-network-analysis.mddCLDgS.bck",
-    "Project Management/05-network-analysis.md66HK7s.bck",
-    "Project Management/05-network-analysis.md8fbCz6.bck",
-    "Project Management/05-network-analysis.mdi9A5FX.bck",
-    "Project Management/05-network-analysis.mdTm9Z6n.bck",
-    "Project Management/05-network-analysis.mdnymrWl.bck",
-    "Project Management/05-network-analysis.mdk0rVSS.bck",
-    "Project Management/05-network-analysis.mdi4La8m.bck",
+    "getting-started-with-netabase-store.md",
+    "netabase_store/getting-started-with-netabase-store.md",
+    "netabase_store/getting-started-with-netabase-store.md.tmp.729973.1763734956925",
+    "netabase_store/02-procedural-macros-and-code-generation.md.tmp.729973.1763734655444",
+    "netabase_store/02-procedural-macros-and-code-generation.md.tmp.729973.1763734639331",
+    "netabase_store/02-procedural-macros-and-code-generation.md.tmp.729973.1763734623767",
+    "netabase_store/01-introduction-and-overview.md",
+    "netabase_store/02-procedural-macros-and-code-generation.mdrlRW07.bck",
+    "netabase_store/02-procedural-macros-and-code-generation.mdb2woew.bck",
+    "netabase_store/02-procedural-macros-and-code-generation.mdieSklW.bck",
+    "netabase_store/summary.mdnxE1Bs.bck",
+    "netabase_store/01-introduction-and-overview.mdctXLnl.bck",
+    "netabase_store/01-introduction-and-overview.mdcNZVtq.bck",
     "Project Management/05-network-analysis.md"
   ]
 }

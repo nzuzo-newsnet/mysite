@@ -24,7 +24,7 @@ pub fn Blogs() -> Element {
             class: "card card-xl h-full flex flex-col",
             // Latest blog post
             div {
-                class: "lg:flex-1 lg:max-h-[40vh] lg:min-h-[40vh] lg:overflow-hidden lg:border-b border-base-300",
+                class: "lg:flex-1 lg:h-full lg:overflow-hidden lg:border-b border-base-300",
                 header {
                     class: "card-header bg-base-100 lg:sticky top-0 z-10",
                     h2 {
@@ -62,7 +62,7 @@ pub fn Blogs() -> Element {
 
             // Recent articles
             div {
-                class: "lg:flex-1 lg:max-h-[60vh] lg:min-h-[60vh] lg:overflow-hidden",
+                class: "lg:flex-1 lg:h-full max-h-dvh lg:overflow-hidden",
                 header {
                     class: "card-header bg-base-100 lg:sticky top-0 z-10",
                     h2 {
