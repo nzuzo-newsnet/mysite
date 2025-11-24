@@ -12,8 +12,8 @@ name = "Project Management"
 prev = "Project Management/04-people"
 #####
 # Network Analysis
-Network analysis is the practice of evaluating tasks in a project, their durations and dependencies to find a critical path.
-Critical paths are valuable as they highlight the sequence of events that define the projects main progress.
+Network analysis[1] is the practice of evaluating tasks in a project, their durations and dependencies to find a critical path[2].
+Critical paths[2] are valuable as they highlight the sequence of events that define the projects main progress.
 Most tasks that branch out of the Critical path are eventually going to feed back into it as we start collecting parallel work.
 That means that if there is a delay in the critical path, the entire project is delayed as it cannot be parallelised.
 
@@ -31,10 +31,10 @@ Let's take note of some terminology:
   - Multiple paths can be critical.
 **Stack/Float**: The amount of leeway permissible in a task, without affecting the critical path.
 
-There are generally two ways to perform a network analysis. Critical Path Management and Critical Chain Project Management. Both of these methods undergo similar sequence of events, which we will explore now.
+There are generally two ways to perform a network analysis. Critical Path Management[3] and Critical Chain Project Management[4]. Both of these methods undergo similar sequence of events, which we will explore now.
 
 ## Critical Path Management
-There are generally six steps involved in Critical Path Management:
+There are generally six steps involved in Critical Path Management[3]:
 // Summarise each step as a "cheat sheet".
 1. Label and Estimate your tasks
 2. Perform a "forward pass"
@@ -46,7 +46,7 @@ There are generally six steps involved in Critical Path Management:
 ### Activity on Node for CPM
 Let us start with a basic example.
 Say you want to perform a Network analysis on the assembly of a toy car.
-This is how you would carry out the steps in a CPM Network analysis:
+This is how you would carry out the steps in a CPM[3] Network analysis:
 
 #### Step 1: Identify and Estimate task duration
 Here, we need to find *what* needs to happen and guess how long we think it would take. In my opinion, this skill can only really be developed well through experience.
@@ -135,4 +135,13 @@ This intuition is helpful when trying to understand critical path.
 The critical path is the string of activities that **cannot** be delayed at all. In the above example, our critical path would be 1, 2, 4, 5, 6 because both their free floats and total floats are 0.
 
 [![Critical-path-drawio.jpg](https://i.postimg.cc/T2DwK25Z/Critical-path-drawio.jpg)](https://postimg.cc/JtRmgLqq)
+
+---
+
+## References
+
+[1]: https://www.pmi.org/learning/library/network-analysis-project-management-6275 "Network Analysis in Project Management - PMI"
+[2]: https://www.projectmanager.com/guides/critical-path-method "Critical Path Method (CPM) - Project Management Guide"
+[3]: https://en.wikipedia.org/wiki/Critical_path_method "Critical Path Management - Wikipedia"
+[4]: https://www.projectmanager.com/blog/critical-chain-project-management "Critical Chain Project Management - Project Manager"
 

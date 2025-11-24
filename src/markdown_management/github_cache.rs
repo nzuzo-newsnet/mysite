@@ -2,12 +2,11 @@ use netabase_store::netabase_definition_module;
 
 #[netabase_definition_module(GitHubCacheDefinition, GitHubCacheKeys)]
 pub mod github_cache_schema {
-    use netabase_macros::{netabase, NetabaseModel};
-    use serde::{Deserialize, Serialize};
+    use netabase_store::{netabase, NetabaseModel};
 
     /// Cached GitHub data structure stored in IndexedDB
     /// Uses the parent GitHubRepo type with bincode encoding
-    #[derive(NetabaseModel, bincode::Encode, bincode::Decode, Clone, Debug, Serialize, Deserialize)]
+    #[derive(NetabaseModel, Clone, Debug, bincode::Encode, bincode::Decode, serde::Serialize, serde::Deserialize)]
     #[netabase(GitHubCacheDefinition)]
     pub struct CachedGitHubData {
         #[primary_key]

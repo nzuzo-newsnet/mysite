@@ -668,6 +668,110 @@ pub async fn fetch_series_by_name(series_name: String) -> Result<SeriesData, Ser
     })
 }
 
+/// Paginated articles response
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PaginatedArticles {
+    pub articles: Vec<ArticleWithMetadata>,
+    pub total_count: usize,
+    pub page: usize,
+    pub per_page: usize,
+    pub total_pages: usize,
+}
+
+/// Fetch standalone articles (not part of any series) with pagination
+#[server]
+#[cached::proc_macro::cached(
+    time = 5,
+    result = true,
+    sync_writes = true,
+    key = "String",
+    convert = r#"{ format!("{}_{}", page, per_page) }"#
+)]
+pub async fn fetch_standalone_articles(
+    page: usize,
+    per_page: usize,
+) -> Result<PaginatedArticles, ServerFnError> {
+    use futures::future::join_all;
+
+    dioxus::logger::tracing::info!(
+        "fetch_standalone_articles: page={}, per_page={}",
+        page,
+        per_page
+    );
+
+    // Fetch articles list (cached)
+    let articles = list_files().await?;
+
+    // Fetch all articles with metadata in parallel
+    let futures = articles.iter().map(|article| {
+        let path = article.path.clone();
+        async move { fetch_article_with_metadata(path).await }
+    });
+
+    let results: Vec<Result<ArticleWithMetadata, ServerFnError>> = join_all(futures).await;
+
+    // Collect successful results and filter for standalone articles
+    let mut standalone_articles: Vec<ArticleWithMetadata> = results
+        .into_iter()
+        .filter_map(|r| r.ok())
+        .filter(|article| {
+            // Filter out summary files
+            if article.metadata.name.contains("summary") {
+                return false;
+            }
+
+            // Keep articles that are not part of any series
+            if let Some(ref metadata) = article.toml_metadata {
+                metadata.primary_series.is_none() && metadata.series.is_empty()
+            } else {
+                // Articles without metadata are considered standalone
+                true
+            }
+        })
+        .collect();
+
+    // Sort by date (most recent first)
+    standalone_articles.sort_by(|a, b| {
+        match (&a.toml_metadata, &b.toml_metadata) {
+            (Some(meta_a), Some(meta_b)) => {
+                // Sort by date descending (most recent first)
+                meta_b.date.cmp(&meta_a.date)
+            }
+            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => std::cmp::Ordering::Greater,
+            (None, None) => a.metadata.name.cmp(&b.metadata.name),
+        }
+    });
+
+    let total_count = standalone_articles.len();
+    let total_pages = (total_count + per_page - 1) / per_page;
+
+    // Calculate pagination
+    let start_idx = page.saturating_sub(1) * per_page;
+    let end_idx = (start_idx + per_page).min(total_count);
+
+    let paginated_articles = if start_idx < total_count {
+        standalone_articles[start_idx..end_idx].to_vec()
+    } else {
+        Vec::new()
+    };
+
+    dioxus::logger::tracing::info!(
+        "fetch_standalone_articles: Found {} total, returning {} for page {}",
+        total_count,
+        paginated_articles.len(),
+        page
+    );
+
+    Ok(PaginatedArticles {
+        articles: paginated_articles,
+        total_count,
+        page,
+        per_page,
+        total_pages,
+    })
+}
+
 /// Fetch about me content
 #[server]
 #[cached::proc_macro::cached(time = 300, result = true, sync_writes = true)]

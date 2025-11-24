@@ -295,7 +295,7 @@ A good manager:
 * Resolves conflicts early
 * Enables productivity rather than dictates it
 
-This is **servant leadership** in action.
+This is **servant leadership**[1] in action.
 
 ---
 
@@ -308,7 +308,7 @@ Teams thrive when people can:
 * Challenge decisions constructively
 * Propose unconventional ideas
 
-Fear suppresses communication; safety enables innovation.
+Fear suppresses communication; safety enables innovation[2].
 
 ---
 
@@ -331,4 +331,11 @@ No plan survives contact with reality.
 Requirements evolve, contexts change, people come and go.
 Successful managers **adjust course** rather than resist change.
 
-The goal isn’t to eliminate uncertainty — it’s to **navigate it gracefully.**
+The goal isn't to eliminate uncertainty — it's to **navigate it gracefully.**
+
+---
+
+## References
+
+[1]: https://www.greenleaf.org/what-is-servant-leadership/ "What is Servant Leadership? - Greenleaf Center"
+[2]: https://www.psychologytoday.com/us/basics/psychological-safety "Psychological Safety in Teams - Psychology Today"

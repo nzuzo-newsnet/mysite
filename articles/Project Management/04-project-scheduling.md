@@ -82,7 +82,7 @@ Think of it as modular design applied to time management: the fewer dependencies
 
 ## Non-Agile Project Scheduling
 
-In a **non-agile (traditional or waterfall)** environment, scheduling is a **pre-planning exercise**.
+In a **non-agile (traditional or waterfall)**[1] environment, scheduling is a **pre-planning exercise**.
 The goal is to establish a linear, predictable sequence of tasks based on detailed requirements and design documents.
 
 The process typically looks like this:
@@ -92,9 +92,9 @@ The process typically looks like this:
 2. **Identify dependencies:** Determine which tasks depend on the completion of others.
 3. **Estimate resources:** Identify the people, tools, and materials needed.
 4. **Allocate resources:** Assign the right people to the right tasks.
-5. **Generate project charts:** Visualize the sequence of activities, usually via **Gantt charts**.
+5. **Generate project charts:** Visualize the sequence of activities, usually via **Gantt charts**[2].
 
-By the end of this process, teams usually produce a **Gantt chart**, which serves as a roadmap for tracking progress throughout the project.
+By the end of this process, teams usually produce a **Gantt chart**[2], which serves as a roadmap for tracking progress throughout the project.
 
 ---
 
@@ -132,7 +132,7 @@ Gantt charts are most useful when **time is a primary constraint** — for examp
 
 ## Kanban Boards
 
-While Gantt charts show *when* work happens, **Kanban boards** show *how* work flows*.
+While Gantt charts show *when* work happens, **Kanban boards**[3] show *how* work flows*.
 They visualize the *current state* of tasks and make it easy to track progress dynamically.
 
 A Kanban board is usually divided into **columns** representing stages of work.
@@ -181,3 +181,11 @@ In essence, the Gantt chart answers *“Where are we headed?”*
 while the Kanban board answers *“Where are we right now?”*
 
 Together, they create a comprehensive scheduling system that supports both **long-term planning** and **short-term adaptability** — a balance crucial for modern project management.
+
+---
+
+## References
+
+[1]: https://www.projectmanager.com/guides/waterfall-methodology "Waterfall Project Management Methodology"
+[2]: https://www.gantt.com/ "Gantt Charts - History and Modern Usage"
+[3]: https://www.atlassian.com/agile/kanban "Kanban Board - Agile Project Management"

@@ -29,9 +29,9 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 
 # Netabase cache dependencies
-netabase_store = { git = "https://github.com/newsnet-africa/netabase_store.git", default-features = false, features = ["wasm"], optional = true }
-netabase_macros = { git = "https://github.com/newsnet-africa/netabase_store.git", optional = true }
-netabase_deps = { git = "https://github.com/newsnet-africa/netabase_store.git", optional = true }
+netabase_store = { path = "../NewsNet/netabase_store", default-features = false, features = ["wasm"], optional = true }
+netabase_macros = { path = "../NewsNet/netabase_store/netabase_macros", optional = true }
+netabase_deps = { path = "../NewsNet/netabase_store/netabase_deps", optional = true }
 bincode = { version = "2.0", features = ["serde"], optional = true }
 strum = { version = "0.27.2", features = ["derive"], optional = true }
 derive_more = { version = "2.0.1", features = ["from", "try_into", "into"], optional = true }

@@ -24,9 +24,9 @@ This article covers:
 - Handling secondary key indexing
 - Cross-platform considerations (native vs WASM)
 
-## The Power of Trait-Based Abstraction
+## The Power of [Trait][1]-Based Abstraction
 
-The key insight is that despite their differences, all key-value databases offer similar operations. By defining a trait that captures these operations, we can write code that works with any backend:
+The key insight is that despite their differences, all key-value databases offer similar operations. By defining a [trait][1] that captures these operations, we can write code that works with any backend:
 
 ```rust
 pub trait NetabaseTreeSync<'db, D, M> {
@@ -49,7 +49,7 @@ pub trait NetabaseTreeSync<'db, D, M> {
 
 Let's examine the key design decisions:
 
-**1. Associated Types vs Generic Parameters**
+**1. [Associated Types][2] vs [Generic Parameters][3]**
 
 ```rust
 // Why this:
@@ -64,7 +64,7 @@ pub trait NetabaseTreeSync<'db, D, M, PK, SK> {
 }
 ```
 
-Associated types make the API cleaner. Each model has exactly one primary key type and one secondary keys enum, so they should be associated with the implementation rather than chosen at call sites.
+[Associated types][2] make the API cleaner. Each model has exactly one primary key type and one secondary keys [enum][4], so they should be associated with the implementation rather than chosen at call sites.
 
 **2. Borrowing Strategy**
 
@@ -88,7 +88,7 @@ Unlike primary keys (which are unique), multiple models can have the same second
 
 ## Implementing SledStore
 
-Sled is a high-performance embedded database. Let's see how we implement the traits for it.
+[Sled][5] is a high-performance embedded database. Let's see how we implement the [traits][1] for it.
 
 ### The Store Structure
 
@@ -103,12 +103,12 @@ where
 ```
 
 The store holds:
-- A sled database instance
+- A [sled][5] database instance
 - A list of all known tree discriminants (for iteration)
 
 ### The Tree Structure
 
-Each model gets its own "tree" (sled's term for a namespace within the database):
+Each model gets its own "tree" ([sled][5]'s term for a namespace within the database):
 
 ```rust
 pub struct SledStoreTree<'db, D, M>
@@ -126,11 +126,13 @@ where
 ```
 
 **Key observations:**
-- We maintain two sled trees: one for primary storage, one for secondary indexes
-- Phantom types ensure type safety without runtime cost
-- The `'db` lifetime ties the tree to its parent store
+- We maintain two [sled][5] trees: one for primary storage, one for secondary indexes
+- [Phantom types][6] ensure type safety without runtime cost
+- The `'db` [lifetime][7] ties the tree to its parent store
 
 ### Creating Trees
+
+The simplest way to understand the implementation is with a wrapper around [sled][5]:
 
 ```rust
 impl<D> SledStore<D>
@@ -188,8 +190,8 @@ where
         let secondary_keys = model.secondary_keys();
 
         // Step 2: Serialize keys and model
-        let pk_bytes = bincode::encode_to_vec(&primary_key, bincode::config::standard())?;
-        let model_bytes = bincode::encode_to_vec(&model, bincode::config::standard())?;
+        let pk_bytes = [bincode][8]::encode_to_vec(&primary_key, [bincode][8]::config::standard())?;
+        let model_bytes = [bincode][8]::encode_to_vec(&model, [bincode][8]::config::standard())?;
 
         // Step 3: Check if model already exists (for secondary key cleanup)
         let old_model: Option<M> = self.tree.get(&pk_bytes)?
@@ -230,8 +232,8 @@ where
 ### Why This Complexity?
 
 1. **Atomicity**: Using a batch ensures all changes (primary + secondary indexes) happen together or not at all
-2. **Index Cleanup**: If updating an existing model, we must remove old secondary indexes
-3. **Consistency**: Secondary indexes must always point to valid primary keys
+2. **Index Cleanup**: If updating an existing model, we must remove old [secondary indexes][9]
+3. **Consistency**: [Secondary indexes][9] must always point to valid primary keys
 
 ### Data Layout
 
@@ -272,7 +274,7 @@ fn get(&self, key: Self::PrimaryKey) -> Result<Option<M>, NetabaseError> {
 ```
 
 **Performance characteristics:**
-- Sled provides O(log n) lookups via B-tree
+- [Sled][5] provides O(log n) lookups via [B-tree][10]
 - Deserialization cost is proportional to model size
 - No allocations beyond the model itself
 
@@ -316,6 +318,8 @@ Because we serialize the entire secondary key enum, all records with the same ke
 [bincode(UserSecondaryKeys::Age(30))] = prefix for all age 30 records
 ```
 
+This was a really cool thing I learnt about rust enums in general and an example of how valuable it could be to explore how Rust works in the background. 
+
 ## Handling Remove
 
 Removal must also clean up secondary indexes:
@@ -356,9 +360,9 @@ fn remove(&self, key: Self::PrimaryKey) -> Result<Option<M>, NetabaseError> {
 
 Returning the deleted model allows users to access its data one last time.
 
-## Cross-Platform: Async Traits for WASM
+## Cross-Platform: Async [Traits][1] for [WASM][11]
 
-IndexedDB (browser storage) has an asynchronous API. We define a parallel async trait:
+[IndexedDB][12] (browser storage) has an asynchronous API. We define a parallel [async trait][13]:
 
 ```rust
 #[cfg(feature = "wasm")]
@@ -407,9 +411,9 @@ let redb_count = count_users(&redb_tree)?;
 
 The function `count_users` is **completely backend-agnostic**. It works with any type implementing `NetabaseTreeSync`.
 
-## Lifetime Management
+## [Lifetime][7] Management
 
-The `'db` lifetime is crucial for safety:
+The `'db` [lifetime][7] is crucial for safety:
 
 ```rust
 pub struct SledStoreTree<'db, D, M> {
@@ -437,66 +441,78 @@ let tree = {
 
 The compiler prevents us from using trees after their parent store is dropped!
 
-## Benchmarking Trait Overhead
+## Benchmarking [Trait][1] Overhead
 
-An important question: does the trait abstraction have runtime cost?
+An important question: does the [trait][1] abstraction have runtime cost?
 
 ```rust
 // Direct sled call
-let model_bytes = bincode::encode_to_vec(&model, bincode::config::standard())?;
+let model_bytes = [bincode][8]::encode_to_vec(&model, [bincode][8]::config::standard())?;
 tree.insert(key, model_bytes)?;
 
 // Through NetabaseTreeSync trait
 tree.put(model)?;
 ```
 
-**Answer: Zero overhead.** The trait methods are monomorphized at compile time, producing identical machine code to hand-written direct calls.
+**Answer: [Zero overhead][14].** The [trait][1] methods are [monomorphized][15] at compile time, producing identical machine code to hand-written direct calls.
 
-## Redb Implementation Differences
+## [Redb][16] Implementation Differences
 
-Redb is similar to Sled but with different trade-offs. Key differences in implementation:
+[Redb][16] is similar to [Sled][5] but with different trade-offs. Key differences in implementation:
 
 ```rust
 pub struct RedbStoreTree<'db, D, M> {
-    db: Arc<redb::Database>,
+    db: Arc<[redb][16]::Database>,
     table_def: TableDefinition<'static, BincodeWrapper<M::PrimaryKey>, BincodeWrapper<M>>,
     // ...
 }
 ```
 
-1. **Static table definitions**: Redb requires compile-time table definitions
-2. **Wrapper types**: We use `BincodeWrapper<T>` to implement Redb's `Value` trait
-3. **ACID transactions**: Redb provides stronger consistency guarantees
+1. **Static table definitions**: [Redb][16] requires compile-time table definitions
+2. **Wrapper types**: We use `BincodeWrapper<T>` to implement [Redb][16]'s `Value` [trait][1]
+3. **[ACID][17] transactions**: [Redb][16] provides stronger consistency guarantees
 
 Despite these differences, the `NetabaseTreeSync` implementation looks nearly identical from the outside.
 
 ## Summary
 
-Backend abstraction through traits provides:
+Backend abstraction through [traits][1] provides:
 
 1. **Portability**: Write once, run on any backend
 2. **Type Safety**: Compiler catches mismatched types
-3. **Zero Cost**: No runtime overhead from abstraction
+3. **[Zero Cost][14]**: No runtime overhead from abstraction
 4. **Testability**: Easy to test with different backends
 5. **Future-Proof**: New backends integrate seamlessly
 
 The key techniques are:
 
-- Associated types for cleaner APIs
-- Lifetime parameters for resource safety
-- Phantom types for zero-cost type tracking
+- [Associated types][2] for cleaner APIs
+- [Lifetime][7] parameters for resource safety
+- [Phantom types][6] for zero-cost type tracking
 - Batch operations for atomic consistency
-- Careful serialization for cross-backend compatibility
+- Careful [serialization][18] for cross-backend compatibility
 
 ## What's Next?
 
 In the next article, we'll explore the configuration API and transaction system - how we provide a unified, type-safe way to configure different backends and manage multi-operation transactions efficiently.
 
----
+## References
 
-**Further Reading:**
-- [Rust API Guidelines: Traits](https://rust-lang.github.io/api-guidelines/future-proofing.html#traits)
-- [Associated Types vs Generic Parameters](https://doc.rust-lang.org/book/ch19-03-advanced-traits.html#specifying-placeholder-types-in-trait-definitions-with-associated-types)
-- [Phantom Data Explained](https://doc.rust-lang.org/std/marker/struct.PhantomData.html)
-- [Sled Documentation](https://docs.rs/sled)
-- [Redb Documentation](https://docs.rs/redb)
+[1]: https://doc.rust-lang.org/book/ch10-02-traits.html
+[2]: https://doc.rust-lang.org/book/ch19-03-advanced-traits.html#specifying-placeholder-types-in-trait-definitions-with-associated-types
+[3]: https://doc.rust-lang.org/book/ch10-01-syntax.html
+[4]: https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html
+[5]: https://docs.rs/sled/
+[6]: https://doc.rust-lang.org/nomicon/phantom-data.html
+[7]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
+[8]: https://docs.rs/bincode/
+[9]: https://en.wikipedia.org/wiki/Database_index#Secondary_index
+[10]: https://en.wikipedia.org/wiki/B-tree
+[11]: https://webassembly.org/
+[12]: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+[13]: https://rust-lang.github.io/async-book/01_getting_started/04_async_await_primer.html
+[14]: https://doc.rust-lang.org/book/ch19-06-macros.html#zero-cost-abstractions
+[15]: https://doc.rust-lang.org/book/ch10-01-syntax.html#performance-of-code-using-generics
+[16]: https://docs.rs/redb/
+[17]: https://en.wikipedia.org/wiki/ACID
+[18]: https://serde.rs/

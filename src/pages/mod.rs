@@ -6,3 +6,4 @@ pub mod demos_page;
 pub mod reading_page;
 pub mod series_page;
 pub mod series_detail_page;
+pub mod articles_page;

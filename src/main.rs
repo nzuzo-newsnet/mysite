@@ -27,6 +27,8 @@ enum Route {
     Series {},
     #[route("/series/:name")]
     SeriesDetail { name: String },
+    #[route("/articles")]
+    Articles {},
 }
 
 fn main() {
@@ -158,6 +160,17 @@ fn SeriesDetail(name: String) -> Element {
             pages::series_detail_page::SeriesDetailPage {
                 series_name: name
             }
+        }
+    }
+}
+
+#[component]
+fn Articles() -> Element {
+    rsx! {
+        div {
+            class: "h-dvh flex flex-col overflow-hidden",
+            NavBar {}
+            pages::articles_page::ArticlesPage {}
         }
     }
 }

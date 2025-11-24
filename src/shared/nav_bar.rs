@@ -98,6 +98,7 @@ pub fn NavBar() -> Element {
             (crate::Route::Series {}, crate::Route::Series {}) => true,
             // SeriesDetail should also highlight the Series nav item
             (crate::Route::SeriesDetail { .. }, crate::Route::Series {}) => true,
+            (crate::Route::Articles {}, crate::Route::Articles {}) => true,
             _ => false,
         }
     };
@@ -172,6 +173,16 @@ pub fn NavBar() -> Element {
                         "btn btn-ghost"
                     },
                     "Series"
+                }
+
+                Link {
+                    to: "/articles",
+                    class: if is_route_active(&crate::Route::Articles {}) {
+                        "btn btn-ghost btn-active bg-primary text-primary-content"
+                    } else {
+                        "btn btn-ghost"
+                    },
+                    "Articles"
                 }
 
                 // Divider

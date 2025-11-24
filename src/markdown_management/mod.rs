@@ -15,6 +15,7 @@ pub use local::{
     fetch_home_page_data_with_metadata,
     fetch_all_series,
     fetch_series_by_name,
+    fetch_standalone_articles,
     fetch_about_me,
     HomePageData,
     HomePageDataWithMetadata,
@@ -24,6 +25,7 @@ pub use local::{
     SeriesInfo,
     ArticleSeries,
     SeriesData,
+    PaginatedArticles,
 };
 pub use github::{fetch_github_repos, GitHubRepo};
 

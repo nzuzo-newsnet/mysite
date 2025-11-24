@@ -15,12 +15,12 @@ next = "netabase_store/05-performance-optimization-and-zerocopy-api"
 
 ## Introduction
 
-In [Part 3](./03-backend-implementation-and-trait-design.md), we explored how trait-based design enables backend portability. Now we'll examine two critical systems that make the library ergonomic and performant:
+In [Part 3](./03-backend-implementation-and-trait-design.md), we explored how [trait][4]-based design enables backend portability. Now we'll examine two critical systems that make the library ergonomic and performant:
 
 1. **Configuration API**: Type-safe, consistent database initialization across all backends
-2. **Transaction System**: Compile-time safe transaction management with zero-cost abstractions
+2. **Transaction System**: Compile-time safe transaction management with [zero-cost abstractions][1]
 
-Both systems demonstrate advanced Rust patterns: the builder pattern for configuration, and the type-state pattern for transactions.
+Both systems demonstrate advanced Rust patterns: the [builder pattern][2] for configuration, and the [type-state pattern][3] for transactions.
 
 ## The Configuration Problem
 
@@ -39,9 +39,9 @@ let redb = RedbStore::new_with_options("db", RedbOptions { ... })?;
 
 Each backend had its own initialization pattern, making backend switching difficult.
 
-## Unified Configuration with typed-builder
+## Unified Configuration with [`typed-builder`][5]
 
-We use the `typed-builder` crate to create type-safe, self-documenting configuration objects:
+We use the [`typed-builder`][5] crate to create type-safe, self-documenting configuration objects:
 
 ```rust
 use typed_builder::TypedBuilder;
@@ -75,9 +75,9 @@ pub struct FileConfig {
 }
 ```
 
-### Builder Pattern Benefits
+### [Builder Pattern][2] Benefits
 
-The `TypedBuilder` derive macro generates a builder with:
+The [`TypedBuilder`][5] [derive macro][6] generates a builder with:
 
 1. **Required fields**: Must be set (e.g., `path`)
 2. **Optional fields**: Have defaults (e.g., `cache_size_mb`)
@@ -126,9 +126,9 @@ let config = FileConfig::new("app.db");  // Simple
 let temp = FileConfig::temp();            // For testing
 ```
 
-## The BackendStore Trait
+## The BackendStore [Trait][4]
 
-To consume these configurations uniformly, we define the `BackendStore` trait:
+To consume these configurations uniformly, we define the `BackendStore` [trait][4]:
 
 ```rust
 pub trait BackendStore<D: NetabaseDefinitionTrait>: Sized {
@@ -145,7 +145,7 @@ pub trait BackendStore<D: NetabaseDefinitionTrait>: Sized {
 }
 ```
 
-Each backend implements this trait with its appropriate config type:
+Each backend implements this [trait][4] with its appropriate config type:
 
 ```rust
 impl<D> BackendStore<D> for SledStore<D>
@@ -275,17 +275,17 @@ For Redb especially, this was catastrophically slow because each transaction inv
 3. Committing to the write-ahead log
 4. Releasing the lock
 
-## Type-State Pattern for Transactions
+## [Type-State Pattern][3] for Transactions
 
 The solution: reusable transactions with compile-time mode tracking.
 
-### Zero-Cost Mode Markers
+### [Zero-Cost][1] Mode Markers
 
 ```rust
-/// Zero-cost marker type for read-only transactions
+/// [Zero-cost][1] marker type for read-only transactions
 pub struct ReadOnly;
 
-/// Zero-cost marker type for read-write transactions
+/// [Zero-cost][1] marker type for read-write transactions
 pub struct ReadWrite;
 ```
 
@@ -296,7 +296,7 @@ These types exist **only at compile time**. They generate zero runtime code but 
 ```rust
 pub struct TxnGuard<'db, D, Mode> {
     backend: TxnBackend<'db, D>,
-    _mode: PhantomData<Mode>,  // Zero-cost type marker
+    _mode: [PhantomData][7]<Mode>,  // [Zero-cost][1] type marker
 }
 ```
 
@@ -345,7 +345,7 @@ Similar to the transaction guard, tree views inherit the mode:
 ```rust
 pub struct TreeView<'txn, D, M, Mode> {
     backend: TreeBackend<'txn, D, M>,
-    _mode: PhantomData<Mode>,
+    _mode: [PhantomData][7]<Mode>,
 }
 
 // Read operations on ALL modes
@@ -373,9 +373,9 @@ impl<'txn, D, M> TreeView<'txn, D, M, ReadWrite> {
 
 ## Backend-Specific Implementation
 
-### Sled: Immediate Operations
+### [Sled][8]: Immediate Operations
 
-Sled doesn't have true multi-tree transactions, so operations apply immediately:
+[Sled][8] doesn't have true multi-tree transactions, so operations apply immediately:
 
 ```rust
 pub(crate) struct SledTreeBackend<'txn, D, M> {
@@ -397,9 +397,9 @@ where
 }
 ```
 
-### Redb: Transaction Reuse
+### [Redb][9]: Transaction Reuse
 
-Redb stores and reuses the transaction:
+[Redb][9] stores and reuses the transaction:
 
 ```rust
 pub(crate) struct RedbTxnBackend<'db, D> {
@@ -425,7 +425,7 @@ impl<'db, D> TxnGuard<'db, D, ReadWrite> {
 }
 ```
 
-**Key insight**: All operations share the same Redb transaction until `commit()` is called.
+**Key insight**: All operations share the same [Redb][9] transaction until `commit()` is called.
 
 ## Usage Patterns
 
@@ -482,11 +482,11 @@ if some_condition {
 
 | Operation | Old API (per-op txn) | New API (reused txn) | Speedup |
 |-----------|---------------------|---------------------|---------|
-| 1000 inserts (Redb) | ~250ms | ~5ms | **50x** |
-| 1000 reads (Redb) | ~150ms | ~3ms | **50x** |
-| Mixed ops (Redb) | ~200ms | ~4ms | **50x** |
+| 1000 inserts ([Redb][9]) | ~250ms | ~5ms | **50x** |
+| 1000 reads ([Redb][9]) | ~150ms | ~3ms | **50x** |
+| Mixed ops ([Redb][9]) | ~200ms | ~4ms | **50x** |
 
-For Sled, the improvement is smaller (no transaction overhead to begin with), but the API is still cleaner.
+For [Sled][8], the improvement is smaller (no transaction overhead to begin with), but the API is still cleaner.
 
 ## Integration with Configuration
 
@@ -514,35 +514,45 @@ txn.commit()?;
 Both systems showcase important Rust patterns:
 
 ### Configuration API
-- **Builder Pattern**: Type-safe, ergonomic construction
-- **Associated Types**: Each backend declares its config type
-- **Trait Objects**: Unified interface across backends
+- **[Builder Pattern][2]**: Type-safe, ergonomic construction
+- **[Associated Types][10]**: Each backend declares its config type
+- **[Trait Objects][11]**: Unified interface across backends
 - **Smart Defaults**: Required vs optional fields
 
 ### Transaction System
-- **Type-State Pattern**: Compile-time mode tracking
-- **Phantom Types**: Zero-cost polymorphism
-- **RAII**: Automatic rollback on drop
-- **Interior Mutability**: `RefCell` for shared transaction access
+- **[Type-State Pattern][3]**: Compile-time mode tracking
+- **[Phantom Types][7]**: [Zero-cost][1] polymorphism
+- **[RAII][12]**: Automatic rollback on drop
+- **[Interior Mutability][13]**: [`RefCell`][14] for shared transaction access
 
 ## Compile-Time Guarantees
 
 These systems provide:
 
-1. **No runtime overhead**: Phantom types compile away completely
+1. **No runtime overhead**: [Phantom types][7] compile away completely
 2. **Impossible states unreachable**: Can't write through read-only transaction
-3. **Memory safety**: Lifetimes prevent use-after-free
+3. **Memory safety**: [Lifetimes][15] prevent use-after-free
 4. **Backend portability**: Same code works with different backends
 
 ## What's Next?
 
-In the final article, we'll explore the ultimate performance optimization: the zero-copy API for Redb. We'll see how careful use of lifetimes and the `ouroboros` crate enable reading data without any deserialization overhead, achieving 54x speedups for certain operations.
+In the final article, we'll explore the ultimate performance optimization: the zero-copy API for [Redb][9]. We'll see how careful use of [lifetimes][15] and the [`ouroboros`][16] crate enable reading data without any deserialization overhead, achieving 54x speedups for certain operations.
 
----
+## References
 
-**Further Reading:**
-- [Rust Design Patterns: Builder](https://rust-unofficial.github.io/patterns/patterns/creational/builder.html)
-- [Type-State Pattern in Rust](https://cliffle.com/blog/rust-typestate/)
-- [PhantomData Explained](https://doc.rust-lang.org/nomicon/phantom-data.html)
-- [The `typed-builder` crate](https://docs.rs/typed-builder)
-- [RAII in Rust](https://doc.rust-lang.org/rust-by-example/scope/raii.html)
+[1]: https://doc.rust-lang.org/book/ch19-06-macros.html#zero-cost-abstractions
+[2]: https://rust-unofficial.github.io/patterns/patterns/creational/builder.html
+[3]: https://cliffle.com/blog/rust-typestate/
+[4]: https://doc.rust-lang.org/book/ch10-02-traits.html
+[5]: https://docs.rs/typed-builder/
+[6]: https://doc.rust-lang.org/reference/procedural-macros.html
+[7]: https://doc.rust-lang.org/nomicon/phantom-data.html
+[8]: https://docs.rs/sled/
+[9]: https://docs.rs/redb/
+[10]: https://doc.rust-lang.org/book/ch19-03-advanced-traits.html#specifying-placeholder-types-in-trait-definitions-with-associated-types
+[11]: https://doc.rust-lang.org/book/ch17-02-trait-objects.html
+[12]: https://doc.rust-lang.org/rust-by-example/scope/raii.html
+[13]: https://doc.rust-lang.org/book/ch15-05-interior-mutability.html
+[14]: https://doc.rust-lang.org/std/cell/struct.RefCell.html
+[15]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
+[16]: https://docs.rs/ouroboros/

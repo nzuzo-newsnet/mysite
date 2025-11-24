@@ -15,9 +15,9 @@ next = "Project Management/02-people"
 
 Before we dive in, it's worth noting that there are roughly **three main methodologies** practiced in project management.
 
-I won't go into their details here, but they're all worth mentioning because they each attempt to model the same underlying concept — the **Software Development Life Cycle (SDLC)**.
+I won't go into their details here, but they're all worth mentioning because they each attempt to model the same underlying concept — the **Software Development Life Cycle (SDLC)**[1].
 
-The **SDLC** is simply a structured way to describe how software is created and maintained. It's a little strange to think about in project management terms, since projects are typically considered *instances* (with a start and end), not *cycles*.
+The **SDLC**[1] is simply a structured way to describe how software is created and maintained. It's a little strange to think about in project management terms, since projects are typically considered *instances* (with a start and end), not *cycles*.
 
 Still, software must come from *somewhere* — and that somewhere follows a repeating pattern:
 
@@ -29,11 +29,11 @@ Still, software must come from *somewhere* — and that somewhere follows a repe
 
 Different methodologies interpret and apply these phases in their own ways:
 
-* **Waterfall Model** — breaks the SDLC into distinct, sequential phases.
-* **Incremental Development** — overlaps multiple phases so functionality is built gradually in versions.
+* **Waterfall Model**[2] — breaks the SDLC into distinct, sequential phases.
+* **Incremental Development**[3] — overlaps multiple phases so functionality is built gradually in versions.
 * **Integration and Configuration** — assembles reusable components into a complete system.
 
-This series will primarily focus on the **Waterfall** and **Incremental** approaches.
+This series will primarily focus on the **Waterfall**[2] and **Incremental**[3] approaches.
 
 The following "Levels" of project design should be approached **sequentially**, since each builds upon the previous one.
 
@@ -73,8 +73,8 @@ They're the criteria against which the success of the software is measured.
 * **Features and functionality**  
   Define *what* the system must do — e.g., register users, process payments, generate reports.
 
-* **Data inputs and outputs**  
-  Define *what data* enters and leaves the system, including any compliance constraints (GDPR, HIPAA, etc.).
+* **Data inputs and outputs**
+  Define *what data* enters and leaves the system, including any compliance constraints (GDPR[4], HIPAA[5], etc.).
 
 * **User content and interfaces**  
   Define *how* information is presented — what the user sees, interacts with, or provides.
@@ -89,7 +89,7 @@ They're the criteria against which the success of the software is measured.
 The system shall allow users to register, log in, and reset passwords via email verification.
 The system shall restrict administrative features to users with the 'Admin' role.
 The system shall validate input forms and reject incomplete submissions.
-All passwords shall be stored using salted SHA-256 hashing.
+All passwords shall be stored using salted SHA-256 hashing[6].
 The codebase shall be modularized for reusability and follow company naming conventions.
 ```
 
@@ -241,14 +241,14 @@ What's possible given the available **resources**?
 
 * **People**
   * More people ≠ faster progress.
-  * Adding developers to a late project can slow it down (this is known as Brooks's Law).
+  * Adding developers to a late project can slow it down (this is known as Brooks's Law[7]).
   * Analyze *why* a project lags before scaling the team.
   * Consider: onboarding time, communication overhead, and task divisibility.
 
 * **Tooling and Software**
   * IDEs, CI pipelines, and project tracking software can drastically improve productivity.
   * But tools have cost and complexity — adopt only what truly helps.
-  * Example: A small team might benefit from GitHub Issues and a simple Makefile, while a larger organization might need Jira, Jenkins, and comprehensive monitoring.
+  * Example: A small team might benefit from GitHub Issues and a simple Makefile, while a larger organization might need Jira[8], Jenkins[9], and comprehensive monitoring.
 
 * **Hardware**
   * Ensure development environments meet the project's needs.
@@ -258,7 +258,7 @@ What's possible given the available **resources**?
 * **Reusable Components**
   * Frameworks, libraries, or shared modules accelerate development.
   * Allocate time to learn and prototype before fully committing.
-  * Example: Using a well-established web framework like Django or Axum can save months of development time compared to building from scratch.
+  * Example: Using a well-established web framework like Django[10] or Axum can save months of development time compared to building from scratch.
 
 > **Tip:**  
 > Treat feasibility as an *ongoing process*, not a one-time gate.  
@@ -288,7 +288,7 @@ This comprehensive understanding forms the foundation for all subsequent design 
 
 ## Level 2: Subsystems
 
-At this stage, you should already know **which architectural pattern** you'll use (e.g., layered, hexagonal, microservice-based).
+At this stage, you should already know **which architectural pattern**[11] you'll use (e.g., layered, hexagonal, microservice-based).
 
 Now it's time to explore how modules will **interact** with each other.
 
@@ -325,7 +325,7 @@ fn process_order() {
 }
 ```
 
-Let's expand on why high fan-out is problematic. Imagine that each of those four functions (`update_inventory`, `charge_payment`, etc.) changes its interface or behavior. Your `process_order` function now has **four separate reasons to change**. This violates the Single Responsibility Principle and makes testing difficult — you must mock or stub all four dependencies to test `process_order` in isolation.
+Let's expand on why high fan-out is problematic. Imagine that each of those four functions (`update_inventory`, `charge_payment`, etc.) changes its interface or behavior. Your `process_order` function now has **four separate reasons to change**. This violates the Single Responsibility Principle[12] and makes testing difficult — you must mock or stub all four dependencies to test `process_order` in isolation.
 
 By introducing an intermediate service, you reduce the direct dependencies and create a more stable interface.
 
@@ -626,7 +626,7 @@ Now, each module has **high cohesion**:
 
 **email:** Handles outbound emails.
 
-This separation ensures each module has *one reason to change*.
+This separation ensures each module has *one reason to change*[12].
 
 For example, if the email API changes, you modify only `email.rs` — not `account_service.rs`.
 
@@ -735,7 +735,7 @@ For instance, if Class A depends on Class B, and Class B depends on Class A, you
 
 Sometimes, you may need to think about the application of your design outside of an OOP framework. This can be challenging because it is difficult to think about your codebase more abstractly, but learning this skill can improve performance and management of classes drastically.
 
-For example, instead of creating classes for each particle or object in your game engine, you might want to explore Data-Oriented Design (DOD) that moves your "objects" into various classes that are instead responsible for the change in data, not the object itself.
+For example, instead of creating classes for each particle or object in your game engine, you might want to explore Data-Oriented Design (DOD)[13] that moves your "objects" into various classes that are instead responsible for the change in data, not the object itself.
 
 In DOD, instead of having a `Particle` class with position, velocity, and color, you might have separate arrays for positions, velocities, and colors. Operations then iterate over these arrays in parallel, which is more cache-friendly and often faster.
 
@@ -1099,7 +1099,7 @@ At some point during the previous, or future design and project activities, you 
 
 Depending on your methodology and communication style, you may need to spend some time considering what measuring stick you are going to use to track progress.
 
-As overused as it is, SMART is still a fairly reasonable way to guide your goal setting.
+As overused as it is, SMART[14] is still a fairly reasonable way to guide your goal setting.
 
 ### Specific
 
@@ -1137,7 +1137,7 @@ Unrealistic goals demoralize teams and lead to burnout. They also encourage corn
 
 **Example of unrealistic goal:** "Rebuild the entire application from scratch in two weeks with one developer."
 
-**Example of realistic goal:** "Refactor the authentication module to use OAuth2 within the next sprint (two weeks) with the current team of three developers."
+**Example of realistic goal:** "Refactor the authentication module to use OAuth2[15] within the next sprint (two weeks) with the current team of three developers."
 
 To assess realism, consider:
 
@@ -1147,7 +1147,7 @@ To assess realism, consider:
 
 ### Time-Based
 
-Every goal needs a deadline. Without a deadline, there's no urgency, and work expands to fill available time (Parkinson's Law).
+Every goal needs a deadline. Without a deadline, there's no urgency, and work expands to fill available time (Parkinson's Law[16]).
 
 **Example:** "Implement user authentication" is open-ended. "Implement user authentication by November 15th" is time-bound.
 
@@ -1322,3 +1322,24 @@ In essence, there are 5 main activities that you need to plan for to cover your 
 * **Project** — What's the schedule, what are the milestones?
 
 By addressing each of these areas during the planning phase, you set your project up for success. You reduce uncertainty, align stakeholders, and create a shared understanding of what needs to be done and how to do it.
+
+---
+
+## References
+
+[1]: https://en.wikipedia.org/wiki/Systems_development_life_cycle "Software Development Life Cycle (SDLC) - Wikipedia"
+[2]: https://www.projectmanager.com/guides/waterfall-methodology "Waterfall Model - Project Management Guide"
+[3]: https://www.agilealliance.org/glossary/incremental-development/ "Incremental Development - Agile Alliance"
+[4]: https://gdpr.eu/what-is-gdpr/ "General Data Protection Regulation (GDPR) Guide"
+[5]: https://www.hhs.gov/hipaa/index.html "Health Insurance Portability and Accountability Act (HIPAA) - HHS"
+[6]: https://auth0.com/blog/hashing-passwords-one-way-road-to-security/ "Password Hashing Best Practices - Auth0"
+[7]: https://en.wikipedia.org/wiki/Brooks%27s_law "Brooks's Law - Wikipedia"
+[8]: https://www.atlassian.com/software/jira "Jira - Issue & Project Tracking Software"
+[9]: https://www.jenkins.io/ "Jenkins - Continuous Integration and Delivery"
+[10]: https://www.djangoproject.com/ "Django Web Framework"
+[11]: https://martinfowler.com/architecture/ "Software Architecture Guide - Martin Fowler"
+[12]: https://en.wikipedia.org/wiki/Single-responsibility_principle "Single Responsibility Principle - Wikipedia"
+[13]: https://www.dataorienteddesign.com/dodbook/ "Data-Oriented Design - Richard Fabian"
+[14]: https://www.projectsmart.co.uk/smart-goals.php "SMART Goals - Project Management Guide"
+[15]: https://oauth.net/2/ "OAuth 2.0 - Authorization Framework"
+[16]: https://en.wikipedia.org/wiki/Parkinson%27s_law "Parkinson's Law - Wikipedia"

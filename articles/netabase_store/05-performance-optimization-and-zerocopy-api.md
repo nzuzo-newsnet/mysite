@@ -14,12 +14,12 @@ previous = "netabase_store/04-configuration-api-and-transaction-system"
 
 ## Introduction
 
-In the [previous article](./04-configuration-api-and-transaction-system.md), we explored the configuration and transaction systems. Now, in this final article, we'll examine the ultimate performance optimization: the zero-copy Redb backend.
+In the [previous article](./04-configuration-api-and-transaction-system.md), we explored the configuration and transaction systems. Now, in this final article, we'll examine the ultimate performance optimization: the [zero-copy][1] [Redb][2] backend.
 
 We'll see how to:
-- Eliminate deserialization overhead through zero-copy reads
+- Eliminate deserialization overhead through [zero-copy][1] reads
 - Achieve 10-50x performance improvements
-- Use lifetime tracking to safely borrow database memory
+- Use [lifetime][3] tracking to safely borrow database memory
 - Design explicit transaction APIs for batch operations
 
 ## The Performance Problem
@@ -47,10 +47,10 @@ put(user2): create_txn → write → commit → destroy
 put(user3): create_txn → write → commit → destroy
 ```
 
-For Redb, creating a transaction involves:
+For [Redb][2], creating a transaction involves:
 - Acquiring an exclusive lock
 - Allocating transaction metadata
-- Syncing to the write-ahead log on commit
+- Syncing to the [write-ahead log][4] on commit
 - Releasing the lock
 
 This overhead dominates performance for small operations.
@@ -61,7 +61,7 @@ This overhead dominates performance for small operations.
 let user = tree.get(UserPrimaryKey(1))?;  // Always deserializes
 ```
 
-Even if we only need to check if a user exists, we pay the full cost of deserializing the entire model from bincode.
+Even if we only need to check if a user exists, we pay the full cost of deserializing the entire model from [bincode][5].
 
 ## The Zero-Copy Solution
 
@@ -113,12 +113,12 @@ From our benchmarks:
 | redb_wrapper_loop (old) | 34.156 ms | 1x (baseline) |
 | redb_zerocopy_bulk (new) | 2.940 ms | **11.6x** |
 
-## Architecture: Lifetime Hierarchy
+## Architecture: [Lifetime][3] Hierarchy
 
-The zero-copy backend uses strict lifetime tracking to ensure safety:
+The [zero-copy][1] backend uses strict [lifetime][3] tracking to ensure safety:
 
 ```
-RedbStoreZeroCopy<D>                    ('static or app lifetime)
+RedbStoreZeroCopy<D>                    ('static or app [lifetime][3])
   ↓ begin_write() / begin_read()
 RedbWriteTransactionZC<'db, D>          (borrows 'db from store)
 RedbReadTransactionZC<'db, D>           (borrows 'db from store)
@@ -173,8 +173,8 @@ where
 ```
 
 Key points:
-- `Arc<Database>` allows multiple concurrent readers
-- Lifetime `'_` in return types ties transactions to the store
+- [`Arc`][6]<Database> allows multiple concurrent readers
+- [Lifetime][3] `'_` in return types ties transactions to the store
 - No mutable state - fully thread-safe for read transactions
 
 ## Implementation: Write Transactions
@@ -221,13 +221,13 @@ The mutable tree borrows from the transaction:
 pub struct RedbTreeMut<'txn, 'db, D, M> {
     txn: &'txn mut RedbWriteTransactionZC<'db, D>,
     table_name: &'static str,
-    _phantom: PhantomData<M>,
+    _phantom: [PhantomData][7]<M>,
 }
 ```
 
-Notice the two lifetimes:
-- `'txn`: Lifetime of the transaction borrow
-- `'db`: Lifetime of the database (propagated through transaction)
+Notice the two [lifetimes][3]:
+- `'txn`: [Lifetime][3] of the transaction borrow
+- `'db`: [Lifetime][3] of the database (propagated through transaction)
 
 ## Implementation: Tree Operations
 
@@ -245,8 +245,8 @@ where
         let sk_list = model.secondary_keys();
 
         // Serialize
-        let pk_bytes = bincode::encode_to_vec(&pk, bincode::config::standard())?;
-        let model_bytes = bincode::encode_to_vec(&model, bincode::config::standard())?;
+        let pk_bytes = [bincode][5]::encode_to_vec(&pk, [bincode][5]::config::standard())?;
+        let model_bytes = [bincode][5]::encode_to_vec(&model, [bincode][5]::config::standard())?;
 
         // Get table from transaction
         let mut table = self.txn.inner.open_table(self.table_name)?;
@@ -379,7 +379,7 @@ impl<'txn, 'db, D, M> RedbTree<'txn, 'db, D, M> {
 }
 ```
 
-**Future optimization**: Add a `get_ref()` method that returns a borrowed reference instead of cloning. This requires the `ouroboros` crate for self-referential structs.
+**Future optimization**: Add a `get_ref()` method that returns a borrowed reference instead of cloning. This requires the [`ouroboros`][8] crate for [self-referential structs][9].
 
 ## Real-World Usage
 
@@ -456,9 +456,9 @@ fn find_users_by_email(
 
 Read transactions can run concurrently, maximizing throughput.
 
-## When to Use Zero-Copy Backend
+## When to Use [Zero-Copy][1] Backend
 
-### Use Zero-Copy When:
+### Use [Zero-Copy][1] When:
 
 1. **Batch operations**: Importing, exporting, or processing many records
 2. **Complex transactions**: Multiple related changes that must be atomic
@@ -473,7 +473,7 @@ Read transactions can run concurrently, maximizing throughput.
 
 ## Integration with Configuration API
 
-The zero-copy backend works seamlessly with the configuration system:
+The [zero-copy][1] backend works seamlessly with the configuration system:
 
 ```rust
 use netabase_store::config::FileConfig;
@@ -497,7 +497,7 @@ txn.commit()?;
 
 ## Key Design Insights
 
-### 1. Lifetime Propagation
+### 1. [Lifetime][3] Propagation
 
 Each type borrows from its parent, creating a chain:
 
@@ -518,7 +518,7 @@ The standard API is implicit:
 tree.put(user)?;  // Invisible transaction
 ```
 
-The zero-copy API is explicit:
+The [zero-copy][1] API is explicit:
 
 ```rust
 let mut txn = store.begin_write()?;
@@ -536,7 +536,7 @@ RedbWriteTransactionZC  // Can open mutable trees
 RedbReadTransactionZC   // Can only open immutable trees
 ```
 
-The type system prevents accidentally writing through a read transaction.
+The [type system][10] prevents accidentally writing through a read transaction.
 
 ## Benchmarks Summary
 
@@ -550,48 +550,52 @@ From `docs/benchmarks/benchmark_summary.md`:
 
 ## Conclusion
 
-The zero-copy backend demonstrates advanced Rust techniques:
+The [zero-copy][1] backend demonstrates advanced Rust techniques:
 
-- **Lifetime tracking** for safe memory access
-- **Type-state pattern** for compile-time guarantees
+- **[Lifetime][3] tracking** for safe memory access
+- **[Type-state pattern][11]** for compile-time guarantees
 - **Explicit transactions** for batch optimization
 - **Backend abstraction** for portability
 
 Through careful design, we achieve:
 - 10-50x performance improvements
-- Zero unsafe code
+- Zero [unsafe][12] code
 - Compile-time safety guarantees
 - Ergonomic API
 
 This represents the culmination of all techniques from the series:
 - Part 1: Architecture and overview
-- Part 2: Procedural macros for code generation
-- Part 3: Trait-based backend abstraction
+- Part 2: [Procedural macros][13] for code generation
+- Part 3: [Trait][14]-based backend abstraction
 - Part 4: Configuration and transaction systems
 - Part 5: Ultimate performance optimization
 
 ## Series Wrap-Up
 
-Throughout this series, we've built a complete type-safe database abstraction library from scratch. We've seen how Rust's powerful type system, macro capabilities, and zero-cost abstractions enable building safe, fast, and ergonomic systems.
+Throughout this series, we've built a complete type-safe database abstraction library from scratch. We've seen how Rust's powerful [type system][10], [macro][13] capabilities, and [zero-cost abstractions][1] enable building safe, fast, and ergonomic systems.
 
 The techniques we've covered apply broadly to systems programming:
-- Use procedural macros to eliminate boilerplate
-- Design traits for maximum flexibility
-- Leverage lifetimes for compile-time safety
-- Apply type-state pattern for API correctness
+- Use [procedural macros][13] to eliminate boilerplate
+- Design [traits][14] for maximum flexibility
+- Leverage [lifetimes][3] for compile-time safety
+- Apply [type-state pattern][11] for API correctness
 - Profile and optimize hot paths
 
 `netabase_store` shows what's possible when these techniques combine. The result is a library that's both easy to use and hard to misuse - the hallmark of good API design.
 
----
+## References
 
-**Project Links:**
-- [netabase_store on GitHub](https://github.com/newsnet-africa/netabase_store)
-- [Documentation](https://docs.rs/netabase_store)
-- [Crates.io](https://crates.io/crates/netabase_store)
-
-**Further Reading:**
-- [The Rustonomicon: Lifetimes](https://doc.rust-lang.org/nomicon/lifetimes.html)
-- [Zero-Cost Abstractions](https://blog.rust-lang.org/2015/05/11/traits.html)
-- [Advanced Rust Patterns](https://rust-unofficial.github.io/patterns/)
-- [Redb Documentation](https://docs.rs/redb)
+[1]: https://doc.rust-lang.org/book/ch19-06-macros.html#zero-cost-abstractions
+[2]: https://docs.rs/redb/
+[3]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
+[4]: https://en.wikipedia.org/wiki/Write-ahead_logging
+[5]: https://docs.rs/bincode/
+[6]: https://doc.rust-lang.org/std/sync/struct.Arc.html
+[7]: https://doc.rust-lang.org/nomicon/phantom-data.html
+[8]: https://docs.rs/ouroboros/
+[9]: https://rust-unofficial.github.io/patterns/anti_patterns/borrow_clone.html
+[10]: https://doc.rust-lang.org/book/ch03-00-common-programming-concepts.html
+[11]: https://cliffle.com/blog/rust-typestate/
+[12]: https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html
+[13]: https://doc.rust-lang.org/reference/procedural-macros.html
+[14]: https://doc.rust-lang.org/book/ch10-02-traits.html

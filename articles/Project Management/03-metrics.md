@@ -230,7 +230,7 @@ This prevents chronic underestimation and over-commitment.
 
 ## SMART Metrics
 
-For metrics to be meaningful, they should follow the **SMART** principle:
+For metrics to be meaningful, they should follow the **SMART**[1] principle:
 
 1. **Specific** – Each metric must focus on one clear aspect of performance.
    *Example:* “Percentage of code covered by automated tests” is specific, while “code quality” is vague.
@@ -245,6 +245,12 @@ For metrics to be meaningful, they should follow the **SMART** principle:
    *Example:* Tracking “lines of code written” rarely correlates with real progress.
 
 5. **Time-bound** – The metric should be measured at regular, defined intervals.
-   *Example:* “Defects per sprint” or “weekly uptime percentage” rather than open-ended measures.
+   *Example:* "Defects per sprint" or "weekly uptime percentage" rather than open-ended measures.
 
 > Poorly chosen metrics can cause more harm than good—teams may optimize for the wrong goals, leading to inefficiency or burnout.
+
+---
+
+## References
+
+[1]: https://www.projectsmart.co.uk/smart-goals.php "SMART Goals and Metrics - Project Management Guide"
