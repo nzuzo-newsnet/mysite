@@ -2,13 +2,38 @@
 date = "2025-11-20"
 author = "Nzuzo Magagula"
 summary = "An introduction to building a type-safe, multi-backend database abstraction library in Rust using procedural macros and trait-based design"
-thumbnail = "https://i.postimg.cc/pdKhS5Rk/netabase-store-architecture.png"
+thumbnail = "https://i.postimg.cc/d1ZSWs9W/54a1b049-09d1-4d4b-82fd-2c620fbccc0c.jpg"
 category = "Technical"
 show_references = true
 
 [[article_series]]
 name = "Building netabase_store"
 next = "netabase_store/02-procedural-macros-and-code-generation"
+
+[[references]]
+title = "Rust Procedural Macros"
+url = "https://doc.rust-lang.org/reference/procedural-macros.html"
+description = "Official reference on procedural macros in Rust"
+
+[[references]]
+title = "Traits - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch10-02-traits.html"
+description = "Understanding trait-based abstraction in Rust"
+
+[[references]]
+title = "Serialization with Serde"
+url = "https://serde.rs/"
+description = "Official Serde documentation for serialization/deserialization"
+
+[[references]]
+title = "libp2p Documentation"
+url = "https://docs.libp2p.io/"
+description = "Peer-to-peer networking framework"
+
+[[references]]
+title = "Kademlia DHT"
+url = "https://en.wikipedia.org/wiki/Kademlia"
+description = "Distributed hash table for peer-to-peer networks"
 #####
 # Building netabase_store: A Type-Safe Multi-Backend Database Abstraction — Part 1
 

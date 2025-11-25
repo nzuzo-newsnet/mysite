@@ -2,14 +2,34 @@
 date = "2025-11-20"
 author = "Nzuzo Magagula"
 summary = "Implementing database backends with trait-based abstraction - designing portable APIs that work seamlessly across Sled, Redb, and IndexedDB"
-thumbnail = "https://i.postimg.cc/pdKhS5Rk/netabase-store-architecture.png"
+thumbnail = "https://i.postimg.cc/d1ZSWs9W/54a1b049-09d1-4d4b-82fd-2c620fbccc0c.jpg"
 category = "Technical"
 show_references = true
 
 [[article_series]]
 name = "Building netabase_store"
-previous = "netabase_store/02-procedural-macros-and-code-generation"
+prev = "netabase_store/02-procedural-macros-and-code-generation"
 next = "netabase_store/04-configuration-api-and-transaction-system"
+
+[[references]]
+title = "Rust Traits - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch10-02-traits.html"
+description = "Official Rust documentation on traits and trait-based abstraction"
+
+[[references]]
+title = "Associated Types - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch19-03-advanced-traits.html#specifying-placeholder-types-in-trait-definitions-with-associated-types"
+description = "Guide to using associated types in trait definitions"
+
+[[references]]
+title = "Generic Parameters - Rust By Example"
+url = "https://doc.rust-lang.org/rust-by-example/generics.html"
+description = "Examples and explanations of generic type parameters in Rust"
+
+[[references]]
+title = "Enum Types - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch06-00-enums.html"
+description = "Complete guide to Rust enums and pattern matching"
 #####
 # Building netabase_store: Backend Implementation and Trait Design - Part 3
 

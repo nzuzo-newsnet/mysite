@@ -21,6 +21,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
+name = "advanced_markdown_parser"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml 0.9.8",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -387,6 +395,7 @@ dependencies = [
 name = "blogger"
 version = "0.1.1"
 dependencies = [
+ "advanced_markdown_parser",
  "anyhow",
  "base64",
  "bincode",

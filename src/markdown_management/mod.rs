@@ -20,13 +20,14 @@ pub use local::{
     HomePageData,
     HomePageDataWithMetadata,
     ArticleMetadata,
-    ArticleTomlMetadata,
     ArticleWithMetadata,
     SeriesInfo,
-    ArticleSeries,
     SeriesData,
     PaginatedArticles,
 };
+
+// Re-export types from advanced_markdown_parser
+pub use advanced_markdown_parser::{ArticleTomlMetadata, ArticleSeries, Reference};
 pub use github::{fetch_github_repos, GitHubRepo};
 
 #[cfg(feature = "server")]

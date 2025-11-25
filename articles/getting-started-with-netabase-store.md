@@ -2,9 +2,34 @@
 date = "2025-11-21"
 author = "Nzuzo Magagula"
 summary = "A practical, hands-on guide to using netabase_store - from basic CRUD operations to advanced performance optimization with zero-copy APIs"
-thumbnail = "https://i.postimg.cc/pdKhS5Rk/netabase-store-architecture.png"
+thumbnail = "https://i.postimg.cc/ydzVB88M/7714.jpg"
 category = "Tutorial"
 show_references = true
+
+[[references]]
+title = "netabase_store on crates.io"
+url = "https://crates.io/crates/netabase_store"
+description = "Official crate page for netabase_store"
+
+[[references]]
+title = "Rust Book - Using Structs"
+url = "https://doc.rust-lang.org/book/ch05-00-structs.html"
+description = "Understanding Rust structs and data modeling"
+
+[[references]]
+title = "Serde - Serialization Framework"
+url = "https://serde.rs/"
+description = "Serialize and deserialize Rust data structures"
+
+[[references]]
+title = "Bincode Documentation"
+url = "https://docs.rs/bincode/latest/bincode/"
+description = "Binary serialization for Rust"
+
+[[references]]
+title = "Result and Error Handling"
+url = "https://doc.rust-lang.org/book/ch09-00-error-handling.html"
+description = "Rust's approach to error handling"
 #####
 
 # Getting Started with netabase_store: A Practical Guide

@@ -84,10 +84,27 @@ pub fn Blogs() -> Element {
 
                                 rsx! {
                                     div {
-                                        class: "grid grid-cols-1 md:flex md:flex-row gap-4",
-                                        for article in recent_articles {
+                                        class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4",
+                                        // Show only first 11 articles
+                                        for article in recent_articles.iter().take(11) {
                                             ArticleSummaryCard {
                                                 article: article.clone()
+                                            }
+                                        }
+                                        // "Read more" card
+                                        Link {
+                                            to: "/articles",
+                                            class: "card card-sm bg-primary text-primary-content shadow-sm transition-all hover:scale-[1.02]",
+                                            div {
+                                                class: "card-body flex items-center justify-center",
+                                                h3 {
+                                                    class: "card-title text-2xl",
+                                                    "Read More"
+                                                }
+                                                span {
+                                                    class: "text-lg",
+                                                    "→"
+                                                }
                                             }
                                         }
                                     }
@@ -111,36 +128,45 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
 
     rsx! {
         div {
-            class: "space-y-4 flex flex-col h-full gap-3",
+            class: "card lg:card-side bg-base-100 shadow-sm",
 
-            // Thumbnail if available
-            if let Some(ref metadata) = article.toml_metadata {
-                if let Some(ref thumbnail) = metadata.thumbnail {
-                    div {
-                        class: "w-full h-48 overflow-hidden rounded-lg",
-                        img {
-                            src: "{thumbnail}",
-                            alt: "Article thumbnail",
-                            class: "w-full h-full object-cover"
+            // Figure section: Image AND tags
+            div {
+                class: "flex flex-col gap-3 p-4 lg:w-1/3",
+
+                // Thumbnail if available
+                if let Some(ref metadata) = article.toml_metadata {
+                    if let Some(ref thumbnail) = metadata.thumbnail {
+                        figure {
+                            class: "w-full h-48 overflow-hidden rounded-lg",
+                            img {
+                                src: "{thumbnail}",
+                                alt: "Article thumbnail",
+                                class: "w-full h-full object-cover"
+                            }
                         }
+                    }
+                }
+
+                // Metadata/Tags
+                if let Some(ref metadata) = article.toml_metadata {
+                    ArticleMetadataDisplay {
+                        metadata: metadata.clone(),
+                        is_full: true
                     }
                 }
             }
 
-            // Metadata
-            if let Some(ref metadata) = article.toml_metadata {
-                ArticleMetadataDisplay {
-                    metadata: metadata.clone(),
-                    is_full: true
-                }
-            }
+            // Card body: Title and summary
             div {
-                // Title as link
-                Link {
-                    to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
-                    class: "link link-primary",
-                    h1 {
-                        class: "text-2xl font-bold hover:opacity-80",
+                class: "card-body lg:w-2/3",
+
+                // Title
+                h2 {
+                    class: "card-title text-2xl",
+                    Link {
+                        to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
+                        class: "link link-primary hover:opacity-80",
                         "{article.metadata.title}"
                     }
                 }
@@ -165,11 +191,14 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
                     }
                 }
 
-                // Read more link
-                Link {
-                    to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
-                    class: "btn btn-primary",
-                    "Read Full Article →"
+                // Card actions
+                div {
+                    class: "card-actions justify-end",
+                    Link {
+                        to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
+                        class: "btn btn-primary",
+                        "Read Full Article"
+                    }
                 }
             }
         }

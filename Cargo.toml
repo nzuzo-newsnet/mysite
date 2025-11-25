@@ -36,6 +36,7 @@ bincode = { version = "2.0", features = ["serde"], optional = true }
 strum = { version = "0.27.2", features = ["derive"], optional = true }
 derive_more = { version = "2.0.1", features = ["from", "try_into", "into"], optional = true }
 toml = "0.9.8"
+advanced_markdown_parser = { path = "advanced_markdown_parser" }
 
 [features]
 default = ["web"]

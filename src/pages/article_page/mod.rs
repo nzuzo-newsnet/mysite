@@ -116,12 +116,87 @@ pub fn ArticlePage(path: String) -> Element {
                                                     div {
                                                         class: "p-8",
                                                         h2 {
-                                                            class: "text-xl font-bold mb-4",
+                                                            class: "text-xl font-bold mb-6",
                                                             "References & Resources"
                                                         }
-                                                        p {
-                                                            class: "text-base-content opacity-70",
-                                                            "References and resources will appear here once the advanced markdown parser is integrated."
+
+                                                        // Display references if available in metadata
+                                                        if let Some(ref meta) = article.toml_metadata {
+                                                            if !meta.references.is_empty() {
+                                                                div {
+                                                                    class: "space-y-4",
+                                                                    for (index, reference) in meta.references.iter().enumerate() {
+                                                                        div {
+                                                                            class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors",
+                                                                            div {
+                                                                                class: "card-body",
+                                                                                div {
+                                                                                    class: "flex items-start gap-3",
+
+                                                                                    // Reference number badge
+                                                                                    span {
+                                                                                        class: "badge badge-primary badge-lg shrink-0 mt-1",
+                                                                                        "{index + 1}"
+                                                                                    }
+
+                                                                                    // Reference content
+                                                                                    div {
+                                                                                        class: "flex-1 min-w-0",
+
+                                                                                        // Title with link
+                                                                                        a {
+                                                                                            href: "{reference.url}",
+                                                                                            target: "_blank",
+                                                                                            rel: "noopener noreferrer",
+                                                                                            class: "font-semibold text-primary hover:underline break-words",
+                                                                                            "{reference.title}"
+                                                                                        }
+
+                                                                                        // URL display
+                                                                                        div {
+                                                                                            class: "text-sm opacity-70 mt-1 break-all",
+                                                                                            "{reference.url}"
+                                                                                        }
+
+                                                                                        // Description if available
+                                                                                        if let Some(ref description) = reference.description {
+                                                                                            p {
+                                                                                                class: "text-sm mt-2 opacity-80",
+                                                                                                "{description}"
+                                                                                            }
+                                                                                        }
+                                                                                    }
+
+                                                                                    // External link icon
+                                                                                    svg {
+                                                                                        xmlns: "http://www.w3.org/2000/svg",
+                                                                                        class: "h-5 w-5 shrink-0 opacity-50 mt-1",
+                                                                                        fill: "none",
+                                                                                        view_box: "0 0 24 24",
+                                                                                        stroke: "currentColor",
+                                                                                        path {
+                                                                                            stroke_linecap: "round",
+                                                                                            stroke_linejoin: "round",
+                                                                                            stroke_width: "2",
+                                                                                            d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                p {
+                                                                    class: "text-base-content opacity-70",
+                                                                    "No references have been added to this article yet."
+                                                                }
+                                                            }
+                                                        } else {
+                                                            p {
+                                                                class: "text-base-content opacity-70",
+                                                                "No references have been added to this article yet."
+                                                            }
                                                         }
                                                     }
                                                 },
@@ -770,12 +845,12 @@ fn NavigationCards(metadata: ArticleTomlMetadata) -> Element {
     }
 }
 
-/// Navigation button using Link component for proper reactivity
+/// Navigation button using full page redirect
 #[component]
 fn NavigationButton(to: String, class: String, label: String) -> Element {
     rsx! {
-        Link {
-            to: to,
+        a {
+            href: "{to}",
             class: "{class}",
             "{label}"
         }
@@ -788,9 +863,9 @@ fn NavigationCard(to: String, direction: String, title: String) -> Element {
     let is_next = direction == "next";
 
     rsx! {
-        Link {
-            to: to,
-            class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors",
+        a {
+            href: "{to}",
+            class: "card card-sm bg-base-200 hover:bg-base-300 transition-colors block",
             div {
                 class: "card-body",
                 div {

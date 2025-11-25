@@ -2,16 +2,41 @@
 date = "2025-11-20"
 author = "Nzuzo Magagula"
 summary = "Deep dive into procedural macros and code generation - how to parse Rust syntax trees and generate type-safe database code at compile time"
-thumbnail = "https://i.postimg.cc/pdKhS5Rk/netabase-store-architecture.png"
+thumbnail = "https://i.postimg.cc/d1ZSWs9W/54a1b049-09d1-4d4b-82fd-2c620fbccc0c.jpg"
 category = "Technical"
 show_references = true
 
 [[article_series]]
 name = "Building netabase_store"
-previous = "netabase_store/01-introduction-and-overview"
+prev = "netabase_store/01-introduction-and-overview"
 next = "netabase_store/03-backend-implementation-and-trait-design"
+
+[[references]]
+title = "Procedural Macros - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch19-06-macros.html"
+description = "Official guide to macros in Rust"
+
+[[references]]
+title = "syn Crate Documentation"
+url = "https://docs.rs/syn/latest/syn/"
+description = "Library for parsing Rust syntax trees"
+
+[[references]]
+title = "quote Crate Documentation"
+url = "https://docs.rs/quote/latest/quote/"
+description = "Quasi-quoting for Rust code generation"
+
+[[references]]
+title = "Procedural Macros Reference"
+url = "https://doc.rust-lang.org/reference/procedural-macros.html"
+description = "Comprehensive reference for procedural macros"
+
+[[references]]
+title = "Abstract Syntax Tree (AST)"
+url = "https://en.wikipedia.org/wiki/Abstract_syntax_tree"
+description = "Understanding syntax trees in compiler design"
 #####
-# **Part 2 — The Complete Macro System**
+# Part 2 — The Complete Macro System
 
 ### *Understanding the Derive Macros, AST Visitors, and Model Compilation Pipeline*
 

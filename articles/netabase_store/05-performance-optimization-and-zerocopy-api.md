@@ -2,13 +2,33 @@
 date = "2025-11-20"
 author = "Nzuzo Magagula"
 summary = "Achieving 10-50x performance improvements through zero-copy APIs, explicit transaction batching, and advanced lifetime management"
-thumbnail = "https://i.postimg.cc/pdKhS5Rk/netabase-store-architecture.png"
+thumbnail = "https://i.postimg.cc/d1ZSWs9W/54a1b049-09d1-4d4b-82fd-2c620fbccc0c.jpg"
 category = "Technical"
 show_references = true
 
 [[article_series]]
 name = "Building netabase_store"
-previous = "netabase_store/04-configuration-api-and-transaction-system"
+prev = "netabase_store/04-configuration-api-and-transaction-system"
+
+[[references]]
+title = "Zero-Copy Deserialization"
+url = "https://docs.rs/zerocopy/latest/zerocopy/"
+description = "Understanding zero-copy techniques in Rust"
+
+[[references]]
+title = "Redb Documentation"
+url = "https://docs.rs/redb/latest/redb/"
+description = "High-performance embedded database for Rust"
+
+[[references]]
+title = "Lifetimes - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html"
+description = "Understanding Rust lifetimes and borrowing"
+
+[[references]]
+title = "Performance - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch13-04-performance.html"
+description = "Writing performant Rust code"
 #####
 # Building netabase_store: Performance Optimization and Zero-Copy API - Part 5
 
@@ -93,25 +113,25 @@ From our benchmarks:
 
 ### Insert Performance (1000 items)
 
-| Implementation | Time | Speedup |
-|----------------|------|---------|
-| redb_wrapper_loop (old) | 25.737 ms | 1x (baseline) |
-| redb_zerocopy_bulk (new) | 2.827 ms | **9.1x** |
-| redb_zerocopy_loop (new) | 3.958 ms | **6.5x** |
+Comparing implementations for inserting 1000 items:
+
+- **redb_wrapper_loop (old)**: 25.737 ms - baseline (1x)
+- **redb_zerocopy_bulk (new)**: 2.827 ms - **9.1x faster** than baseline
+- **redb_zerocopy_loop (new)**: 3.958 ms - **6.5x faster** than baseline
 
 ### Secondary Key Queries (10 queries)
 
-| Implementation | Time | Speedup |
-|----------------|------|---------|
-| redb_wrapper_loop (old) | 1030.03 µs | 1x (baseline) |
-| redb_zerocopy_txn (new) | 5.11 µs | **201x** |
+Comparing implementations for 10 secondary key queries:
+
+- **redb_wrapper_loop (old)**: 1030.03 µs - baseline (1x)
+- **redb_zerocopy_txn (new)**: 5.11 µs - **201x faster** than baseline
 
 ### Bulk Operations (1000 items)
 
-| Implementation | Time | Speedup |
-|----------------|------|---------|
-| redb_wrapper_loop (old) | 34.156 ms | 1x (baseline) |
-| redb_zerocopy_bulk (new) | 2.940 ms | **11.6x** |
+Comparing implementations for bulk operations on 1000 items:
+
+- **redb_wrapper_loop (old)**: 34.156 ms - baseline (1x)
+- **redb_zerocopy_bulk (new)**: 2.940 ms - **11.6x faster** than baseline
 
 ## Architecture: [Lifetime][3] Hierarchy
 
@@ -542,11 +562,11 @@ The [type system][10] prevents accidentally writing through a read transaction.
 
 From `docs/benchmarks/benchmark_summary.md`:
 
-| Operation | Speedup vs Loop | Note |
-|-----------|-----------------|------|
-| Bulk insert (1000) | 9.1x | Single transaction |
-| Secondary queries (10) | 201x | Transaction reuse |
-| Bulk operations (1000) | 11.6x | Optimized batching |
+Key performance improvements achieved through zero-copy optimization:
+
+- **Bulk insert (1000 items)**: 9.1x speedup through single transaction batching
+- **Secondary queries (10 queries)**: 201x speedup through transaction reuse
+- **Bulk operations (1000 items)**: 11.6x speedup through optimized batching
 
 ## Conclusion
 

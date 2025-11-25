@@ -2,14 +2,34 @@
 date = "2025-11-20"
 author = "Nzuzo Magagula"
 summary = "Building type-safe configuration and transaction systems - the builder pattern and type-state pattern for ergonomic, safe APIs"
-thumbnail = "https://i.postimg.cc/pdKhS5Rk/netabase-store-architecture.png"
+thumbnail = "https://i.postimg.cc/d1ZSWs9W/54a1b049-09d1-4d4b-82fd-2c620fbccc0c.jpg"
 category = "Technical"
 show_references = true
 
 [[article_series]]
 name = "Building netabase_store"
-previous = "netabase_store/03-backend-implementation-and-trait-design"
+prev = "netabase_store/03-backend-implementation-and-trait-design"
 next = "netabase_store/05-performance-optimization-and-zerocopy-api"
+
+[[references]]
+title = "Builder Pattern - Rust Design Patterns"
+url = "https://rust-unofficial.github.io/patterns/patterns/creational/builder.html"
+description = "Guide to the builder pattern in Rust"
+
+[[references]]
+title = "Type-State Pattern"
+url = "https://cliffle.com/blog/rust-typestate/"
+description = "Using the type system to encode state machines"
+
+[[references]]
+title = "Zero-Cost Abstractions"
+url = "https://doc.rust-lang.org/book/ch13-04-performance.html"
+description = "Understanding Rust's zero-cost abstractions"
+
+[[references]]
+title = "Traits - The Rust Book"
+url = "https://doc.rust-lang.org/book/ch10-02-traits.html"
+description = "Comprehensive guide to Rust traits"
 #####
 # Building netabase_store: Configuration API and Transaction System - Part 4
 
@@ -480,11 +500,11 @@ if some_condition {
 
 ## Performance Impact
 
-| Operation | Old API (per-op txn) | New API (reused txn) | Speedup |
-|-----------|---------------------|---------------------|---------|
-| 1000 inserts ([Redb][9]) | ~250ms | ~5ms | **50x** |
-| 1000 reads ([Redb][9]) | ~150ms | ~3ms | **50x** |
-| Mixed ops ([Redb][9]) | ~200ms | ~4ms | **50x** |
+The transaction reuse system provides dramatic performance improvements for Redb operations:
+
+- **1000 inserts**: Old API (per-operation transaction) took ~250ms, while the new API (reused transaction) takes only ~5ms - a **50x speedup**
+- **1000 reads**: Old API took ~150ms, new API takes ~3ms - a **50x speedup**
+- **Mixed operations**: Old API took ~200ms, new API takes ~4ms - a **50x speedup**
 
 For [Sled][8], the improvement is smaller (no transaction overhead to begin with), but the API is still cleaner.
 

@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
+use advanced_markdown_parser::{ArticleTomlMetadata, parse_markdown_with_metadata};
 
 /// Metadata for an article (basic file info)
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -24,67 +25,7 @@ pub struct SeriesInfo {
     pub parent: Option<Box<SeriesInfo>>,
 }
 
-/// Article series navigation for multi-series support
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ArticleSeries {
-    /// Name of the series (e.g., "data-engineering", "advanced-topics")
-    pub name: String,
-    /// Previous article in this series
-    #[serde(default)]
-    pub prev: Option<String>,
-    /// Next article in this series
-    #[serde(default)]
-    pub next: Option<String>,
-}
-
-/// TOML metadata extracted from markdown files
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
-pub struct ArticleTomlMetadata {
-    #[serde(default)]
-    pub date: Option<String>,
-    #[serde(default)]
-    pub author: Option<String>,
-    #[serde(default)]
-    pub summary: Option<String>,
-    #[serde(default)]
-    pub topics: Vec<String>,
-    #[serde(default)]
-    pub tags: Vec<String>,
-    #[serde(default)]
-    pub thumbnail: Option<String>,
-    #[serde(default)]
-    pub reading_time: Option<String>,
-    #[serde(default)]
-    pub category: Option<String>,
-    /// Primary series from folder structure (auto-detected)
-    #[serde(default)]
-    pub primary_series: Option<String>,
-    /// Series information for grouped articles (can specify multiple)
-    #[serde(default)]
-    pub series: Vec<String>,
-    /// Article series with navigation (supports multiple series)
-    #[serde(default)]
-    pub article_series: Vec<ArticleSeries>,
-    /// Legacy: Previous article in sequence (deprecated, use article_series)
-    #[serde(default)]
-    pub prev_article: Option<String>,
-    /// Legacy: Next article in sequence (deprecated, use article_series)
-    #[serde(default)]
-    pub next_article: Option<String>,
-    /// Bottom nav controls
-    #[serde(default = "default_true")]
-    pub show_references: bool,
-    #[serde(default)]
-    pub show_demo: bool,
-    #[serde(default)]
-    pub show_related: bool,
-    #[serde(default)]
-    pub show_quiz: bool,
-}
-
-fn default_true() -> bool {
-    true
-}
+// ArticleTomlMetadata and ArticleSeries are now imported from advanced_markdown_parser
 
 /// Combined article data with content and metadata
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -94,43 +35,7 @@ pub struct ArticleWithMetadata {
     pub content: String,
 }
 
-/// Parse TOML metadata from markdown content
-/// Extracts content between first ##### and next #####
-#[cfg(feature = "server")]
-fn parse_toml_metadata(content: &str) -> Option<ArticleTomlMetadata> {
-    const DELIMITER: &str = "#####";
-
-    // Find the first delimiter
-    let first_delimiter_pos = content.find(DELIMITER)?;
-    let after_first = &content[first_delimiter_pos + DELIMITER.len()..];
-
-    // Find the second delimiter
-    let second_delimiter_pos = after_first.find(DELIMITER)?;
-    let toml_content = &after_first[..second_delimiter_pos].trim();
-
-    // Parse TOML
-    toml::from_str::<ArticleTomlMetadata>(toml_content).ok()
-}
-
-/// Extract content without metadata delimiters
-#[cfg(feature = "server")]
-fn extract_content_without_metadata(content: &str) -> String {
-    const DELIMITER: &str = "#####";
-
-    // Find positions of both delimiters
-    if let Some(first_pos) = content.find(DELIMITER) {
-        let after_first = &content[first_pos + DELIMITER.len()..];
-        if let Some(second_pos) = after_first.find(DELIMITER) {
-            // Return content before first delimiter and after second delimiter
-            let before = &content[..first_pos];
-            let after = &after_first[second_pos + DELIMITER.len()..];
-            return format!("{}{}", before.trim(), after.trim());
-        }
-    }
-
-    // If no metadata found, return original content
-    content.to_string()
-}
+// Parsing functions are now in advanced_markdown_parser crate
 
 /// Extract title from markdown file efficiently (reads only first ~500 bytes)
 #[cfg(feature = "server")]
@@ -307,8 +212,10 @@ pub async fn fetch_article_with_metadata(
         .await
         .map_err(|e| ServerFnError::new(format!("Failed to read article: {}", e)))?;
 
-    // Parse TOML metadata
-    let mut toml_metadata = parse_toml_metadata(&raw_content);
+    // Parse markdown with metadata using advanced_markdown_parser
+    let parsed = parse_markdown_with_metadata(&raw_content);
+    let mut toml_metadata = parsed.metadata;
+    let content = parsed.content;
 
     // Extract primary series from folder structure
     let path_buf = Path::new(&file_path);
@@ -320,9 +227,6 @@ pub async fn fetch_article_with_metadata(
             metadata.primary_series = primary_series;
         }
     }
-
-    // Extract content without metadata delimiters
-    let content = extract_content_without_metadata(&raw_content);
 
     // Extract title from content
     let title = content
