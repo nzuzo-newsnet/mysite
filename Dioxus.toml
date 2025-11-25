@@ -3,7 +3,7 @@
 [web.app]
 
 # HTML title tag content
-title = "blogger"
+title = "Nzuzo Magagula"
 
 # Wasm optimization settings
 [web.wasm-opt]

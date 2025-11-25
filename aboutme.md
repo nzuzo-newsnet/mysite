@@ -1,56 +1,45 @@
 # About Me
 
-Hi, I'm **Nzuzo Magagula** 👋
+Hi, I'm Nzuzo Magagula.
 
-## Background
+I'm a software engineer based in Cape Town, working on solutions that make technological progress accessible to everyone. I switched to computer science because I realized that's where I could actually build the things I wanted to see exist in the world.
 
-I'm a software engineer passionate about building impactful solutions. My work focuses on creating tools and systems that make a real difference in people's lives.
+## What I'm Building
 
-## What I Do
+Right now, I'm focused on three main projects:
 
-I specialize in:
-- **Full-stack development** with modern web technologies
-- **Data analytics** and visualization tools
-- **System architecture** and scalable solutions
-- **Open-source contributions** to the developer community
+**NewsNet** is a decentralized, censorship-resistant network for news analysis. African software and solutions are often overlooked, and I believe information is one of the best ways for people to mobilize for change and improvement. This project is about creating infrastructure that can't be controlled or silenced.
 
-## Current Projects
+**Netabase** is a high-level API for decentralized systems that need storage backends. Think of it as the boring-but-necessary plumbing that makes other decentralized projects possible.
 
-### NewsNet Africa
-A comprehensive platform for aggregating and analyzing African news content. This project helps people stay informed about developments across the continent with intelligent content curation.
+**An operating system** with a microkernel designed to be portable and accessible. I'm interested in what happens when you strip away assumptions about what an OS needs to be and rebuild from first principles.
 
-### Blogger Platform
-This very site! Built with Dioxus and Rust, showcasing modern fullstack web development with reactive UI patterns.
+**A distributed small business management system** that provides affordable access to business management and automation without the recurring cost of a service. Small businesses shouldn't have to choose between expensive software subscriptions and managing everything manually.
 
-### Open Source Contributions
-I actively contribute to various open-source projects, focusing on tools and libraries that help developers build better software faster.
+The best moment in any project is when things start integrating and working together. "IT WORKS" is my favorite exclamation.
 
-## Technical Interests
+## How I Work
 
-I'm particularly interested in:
-- 🦀 Rust programming and systems design
-- 🌐 WebAssembly and modern web architectures
-- 📊 Data engineering and analytics
-- 🤖 Machine learning applications
+I code primarily in Rust. I learned it to challenge myself, and it turned out to be exactly what I was looking for: performant, reliable, and it lets me use references for performance benefits without spending my time tracing segfaults and memory leaks. This site is built with Dioxus and Rust, because why wouldn't I use tools I trust?
 
-## Philosophy
+Right now, I'm working to polish my projects to the point where they're ready to share with the world. This brings up the usual confidence issues and imposter syndrome. I'm concerned about code quality and whether I have what it takes to succeed in this industry. I work hard to learn, because everyone else always seems to know more. But I'm doing the work anyway.
 
-I believe in:
-- **Clean, maintainable code** that others can understand and build upon
-- **User-centered design** that solves real problems
-- **Continuous learning** and sharing knowledge with the community
-- **Open collaboration** and the power of open-source
+## Beyond Code
+
+When I'm not programming, I make music. Lately I've been into house and soulful downbeat sounds, though I'll work with pretty much anything. I also spend a lot of time researching whatever curiosity catches my attention: socio-economic patterns, design patterns that might make development easier, various rabbit holes.
+
+I have a longer-term vision for a suite of devices that could make smart homes accessible to everyone, including people at the lower end of the income bracket. That's a "someday" project. It needs money, time, and resources I don't have yet.
+
+## What I Believe
+
+I'm optimistic about the potential for technology to change things. I'm also well aware that there's a reason things are as stagnant as they are. Progress doesn't happen automatically. It requires people willing to build alternatives, to create tools that serve people instead of controlling them.
+
+I code for passion and for the hope that solutions emerge that can improve the world.
 
 ## Get in Touch
 
-Feel free to reach out if you'd like to:
-- Collaborate on a project
-- Discuss technology and software development
-- Share ideas or feedback
-- Just chat about tech!
+You can find me on [GitHub](https://github.com/nzuzo-newsnet) where I share my work and contribute to open source, or the following emails:
+- nzuzo@newsnet.africa
+- nzuzomagagula@proton.me
 
-You can find me on [GitHub](https://github.com/nzuzo-newsnet) where I share my work and contribute to the community.
-
----
-
-*Thanks for visiting! Feel free to explore my articles and projects.*
+If you want to collaborate, discuss ideas, or just talk about what we're building, reach out.
