@@ -21,6 +21,8 @@ RUN git config --global http.postBuffer 524288000 && \
     git config --global http.lowSpeedTime 999999
 
 COPY --from=planner /app/recipe.json recipe.json
+# Copy path dependencies before cook (needed by cargo-chef)
+COPY advanced_markdown_parser ./advanced_markdown_parser
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
 
