@@ -1,4 +1,4 @@
-use crate::markdown_management::github::{fetch_github_repos, GitHubAccountType, GitHubRepo};
+use crate::markdown_management::github::{GitHubAccountType, GitHubRepo, fetch_github_repos};
 use dioxus::prelude::*;
 
 #[component]
@@ -51,10 +51,13 @@ pub fn Projects() -> Element {
             }
             footer {
                 class: "p-4 bg-base-100 border-t border-base-300 md:sticky bottom-0",
+                a {
+                    href: "https://github.com/nzuzo-newsnet",
                 button {
                     class: "btn btn-sm btn-primary w-full",
                     onclick: move |_| repos.restart(),
-                    "Refresh"
+                    "Visit"
+                }
                 }
             }
         }

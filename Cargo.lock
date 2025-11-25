@@ -385,7 +385,7 @@ dependencies = [
 
 [[package]]
 name = "blogger"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "base64",
@@ -3668,6 +3668,8 @@ dependencies = [
 [[package]]
 name = "netabase_deps"
 version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e8714c01f3b4910a0685f4bca0cf27933cd9eb5094dc3c1c659c8c1d524af7f"
 dependencies = [
  "bincode",
  "blake3",
@@ -3681,6 +3683,8 @@ dependencies = [
 [[package]]
 name = "netabase_macros"
 version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ece4e865257ac8c3187971e4d5b1fcf35c2a441689c15c069838cfb4fec7f05f"
 dependencies = [
  "anyhow",
  "bincode",
@@ -3700,6 +3704,8 @@ dependencies = [
 [[package]]
 name = "netabase_store"
 version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b74cdd1a5ef2e49dddde73395f7323ca8519dcb314dc50337279f41a81c4c520"
 dependencies = [
  "anyhow",
  "bincode",
