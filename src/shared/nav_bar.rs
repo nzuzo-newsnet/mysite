@@ -1,5 +1,5 @@
-use dioxus::prelude::*;
 use dioxus::document::eval;
+use dioxus::prelude::*;
 use dioxus_free_icons::{Icon, icons::ld_icons::LdHome};
 
 #[component]
