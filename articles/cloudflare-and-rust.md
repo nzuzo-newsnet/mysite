@@ -1,0 +1,2 @@
+Over the weekend, Cloudflare has an outage that essentially rendered most of the internet unusable. It got so bad that [even downdetector went down](https://www.msn.com/en-us/news/technology/the-internet-crashed-so-hard-this-morning-that-downdetector-went-down/ar-AA1QFyNB).
+As is tradition, everyone had an opinion on this event and quite frankly, so do I. The thing is, my echo chamber seemed to ring the loudest about 2 main issues; The weird frequency of large service providers grinding the planet to a halt, and the roles and promises of rust.

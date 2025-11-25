@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  blogger:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount your local articles directory and aboutme.md into the container
+      - ./articles:/usr/local/app/articles:ro
+      - ./aboutme.md:/usr/local/app/aboutme.md:ro
+    environment:
+      PORT: 8080
+      IP: 0.0.0.0
+    restart: unless-stopped

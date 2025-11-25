@@ -3,7 +3,10 @@ RUN cargo install cargo-chef
 WORKDIR /app
 
 FROM chef AS planner
-COPY . .
+# Only copy files needed for dependency resolution
+COPY Cargo.toml Cargo.lock ./
+COPY advanced_markdown_parser ./advanced_markdown_parser
+COPY src ./src
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
@@ -21,8 +24,13 @@ RUN git config --global http.postBuffer 524288000 && \
     git config --global http.lowSpeedTime 999999
 
 COPY --from=planner /app/recipe.json recipe.json
+# Copy path dependencies before cook (needed by cargo-chef)
+COPY advanced_markdown_parser ./advanced_markdown_parser
 RUN cargo chef cook --release --recipe-path recipe.json
-COPY . .
+# Copy remaining files needed for build (not articles - they'll be mounted at runtime)
+COPY Cargo.toml Cargo.lock Dioxus.toml tailwind.css ./
+COPY src ./src
+COPY assets ./assets
 
 # Create the final bundle folder. Bundle always executes in release mode with optimizations enabled
 RUN dx bundle --web --release
@@ -34,12 +42,11 @@ RUN ls -la /app/target/dx/ && \
 
 FROM chef AS runtime
 COPY --from=builder /app/target/dx/blogger/release/web/ /usr/local/app
-COPY --from=builder /app/articles /usr/local/app/articles
 
 # Debug: Verify files are present
-RUN ls -a /usr/local/app && \
-    echo "Articles folder:" && \
-    ls -la /usr/local/app/articles | head -10
+RUN ls -a /usr/local/app
+
+# Articles will be mounted as a volume at runtime
 
 # set our port and make sure to listen for all connections
 ENV PORT=8080
