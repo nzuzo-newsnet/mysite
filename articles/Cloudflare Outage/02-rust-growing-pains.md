@@ -10,7 +10,7 @@ show_references = true
 name = "Cloudflare Outage & Infrastructure Fragility"
 prev = "Cloudflare Outage/01-centralization-and-infrastructure"
 #####
-# **Rust, Reality, and the Strange State of Language Discourse**
+# Rust, Reality, and the Strange State of Language Discourse
 
 Programming languages rarely inspire neutrality. For better or worse, they become symbols—of ideals, of identity, of “the right way to build software.” Nowhere has this been more apparent in the last decade than in the discussion around Rust. The language’s meteoric rise, bold claims, and distinctive constraints have created an environment where people don’t just debate technical tradeoffs; they defend worldviews.
 
