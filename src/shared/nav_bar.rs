@@ -1,6 +1,5 @@
 use dioxus::document::eval;
 use dioxus::prelude::*;
-use dioxus_free_icons::{Icon, icons::ld_icons::LdHome};
 
 #[component]
 pub fn NavBar() -> Element {
@@ -126,12 +125,6 @@ pub fn NavBar() -> Element {
                     } else {
                         "btn btn-ghost flex items-center gap-2"
                     },
-                    Icon {
-                        height: 20,
-                        width: 20,
-                        fill: "currentColor",
-                        icon: LdHome,
-                    }
                     "Home"
                 }
 
