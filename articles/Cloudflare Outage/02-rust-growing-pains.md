@@ -8,7 +8,7 @@ show_references = true
 
 [[article_series]]
 name = "Cloudflare Outage & Infrastructure Fragility"
-next = ""
+prev = "Cloudflare Outage/01-centralization-and-infrastructure"
 #####
 # **Rust, Reality, and the Strange State of Language Discourse**
 

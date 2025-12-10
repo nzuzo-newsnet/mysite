@@ -8,7 +8,7 @@ show_references = true
 
 [[article_series]]
 name = "Cloudflare Outage & Infrastructure Fragility"
-next = "Cloudflare Outage & Infrastructure Fragility/02-rust-growing-pains"
+next = "Cloudflare Outage/02-rust-growing-pains"
 
 [[references]]
 title = "Web3 - Wikipedia"
