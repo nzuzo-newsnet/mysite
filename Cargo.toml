@@ -50,8 +50,8 @@ opt-level = 'z'     # Optimize for size
 lto = true          # Enable Link Time Optimization
 codegen-units = 1   # Better optimization
 panic = 'abort'     # Reduce binary size
-strip = "debuginfo" # Strip only debug info, keep asset references
+strip = false       # Disable strip to fix Docker build error, wasm-opt handles WASM
 
 [profile.release.package."*"]
 opt-level = 'z'
-strip = "debuginfo"
+strip = false
