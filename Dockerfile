@@ -9,7 +9,8 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM chef AS builder
 # Install `dx` early so it can be cached
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-RUN cargo binstall dioxus-cli --root /.cargo -y --force
+# RUN cargo binstall dioxus-cli --root /.cargo -y --force
+RUN cargo install --git https://github.com/DioxusLabs/dioxus dioxus-cli --locked
 ENV PATH="/.cargo/bin:$PATH"
 
 # Add wasm target
