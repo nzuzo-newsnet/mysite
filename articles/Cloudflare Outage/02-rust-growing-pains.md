@@ -1,5 +1,5 @@
 #####
-date = "2025-11-25"
+date = "2025-12-12"
 author = "Nzuzo Magagula"
 summary = "Exploring why one bug broke the internet, the role of centralization in modern tech, and how our consumption choices shape internet infrastructure"
 thumbnail = "https://i.postimg.cc/3wMCP1N0/cracked-white-plaster-wall-texture-background.jpg"
