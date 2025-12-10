@@ -1,6 +1,8 @@
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
-use advanced_markdown_parser::{ArticleTomlMetadata, parse_markdown_with_metadata};
+use advanced_markdown_parser::ArticleTomlMetadata;
+#[cfg(feature = "server")]
+use advanced_markdown_parser::parse_markdown_with_metadata;
 
 /// Metadata for an article (basic file info)
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

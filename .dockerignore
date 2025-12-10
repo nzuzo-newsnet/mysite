@@ -18,6 +18,7 @@ node_modules/
 *.log
 *.md
 !README.md
+!aboutme.md
 !articles/**/*.md
 .env
 .DS_Store
