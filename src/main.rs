@@ -67,6 +67,17 @@ fn App() -> Element {
             name: "viewport",
             content: "width=device-width, initial-scale=1.0, maximum-scale=5.0",
         }
+        
+        // Background for Glassmorphism
+        div {
+            class: "fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-base-300",
+            img {
+                src: "/main_image.jpg",
+                class: "w-full h-full object-cover blur-3xl opacity-50 scale-105",
+                alt: "Background"
+            }
+        }
+
         Router::<Route> {}
     }
 }
@@ -75,7 +86,7 @@ fn App() -> Element {
 fn Home() -> Element {
     rsx! {
         div {
-            class: "h-dvh flex flex-col overflow-hidden",
+            class: "min-h-dvh flex flex-col",
             NavBar {}
             pages::home_page::HomePage {}
         }

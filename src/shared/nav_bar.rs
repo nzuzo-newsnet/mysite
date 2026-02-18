@@ -44,53 +44,66 @@ pub fn NavBar() -> Element {
                     const iframes = document.querySelectorAll('iframe');
                     iframes.forEach(iframe => {{
                         try {{
+                            console.log('Posting theme change to iframe:', '{}');
                             iframe.contentWindow.postMessage({{
                                 type: 'THEME_CHANGE',
                                 theme: '{}'
                             }}, '*');
-                        }} catch (e) {{}}
+                        }} catch (e) {{
+                            console.error('Failed to post theme to iframe:', e);
+                        }}
                     }});
-                }} catch (e) {{}}
+                }} catch (e) {{
+                    console.error('Failed to save theme:', e);
+                }}
                 "#,
-                current_theme, current_theme, current_theme
+                current_theme, current_theme, current_theme, current_theme
             ));
         }
     });
 
-    let available_themes = vec![
-        ("light", "☀️ Light"),
-        ("dark", "🌙 Dark"),
+    let light_themes = vec![
+        ("glass", "✨ Glassmorphism"),
+        ("light", "☀️ Default Light"),
         ("cupcake", "🧁 Cupcake"),
         ("bumblebee", "🐝 Bumblebee"),
         ("emerald", "💚 Emerald"),
         ("corporate", "💼 Corporate"),
-        ("synthwave", "🌆 Synthwave"),
         ("retro", "📺 Retro"),
-        ("cyberpunk", "🤖 Cyberpunk"),
         ("valentine", "💝 Valentine"),
-        ("halloween", "🎃 Halloween"),
         ("garden", "🌻 Garden"),
-        ("forest", "🌲 Forest"),
         ("aqua", "🌊 Aqua"),
         ("lofi", "🎵 Lo-Fi"),
         ("pastel", "🎨 Pastel"),
         ("fantasy", "🦄 Fantasy"),
         ("wireframe", "📐 Wireframe"),
-        ("black", "⬜ Black"),
-        ("luxury", "💎 Luxury"),
-        ("dracula", "🧛 Dracula"),
         ("cmyk", "🖨️ CMYK"),
         ("autumn", "🍂 Autumn"),
-        ("business", "📊 Business"),
         ("acid", "🧪 Acid"),
         ("lemonade", "🍋 Lemonade"),
-        ("night", "🌃 Night"),
-        ("coffee", "☕ Coffee"),
         ("winter", "❄️ Winter"),
-        ("dim", "🔅 Dim"),
         ("nord", "🏔️ Nord"),
         ("sunset", "🌅 Sunset"),
     ];
+
+    let dark_themes = vec![
+        ("dark", "🌙 Default Dark"),
+        ("synthwave", "🌆 Synthwave"),
+        ("halloween", "🎃 Halloween"),
+        ("forest", "🌲 Forest"),
+        ("black", "⬜ Black"),
+        ("luxury", "💎 Luxury"),
+        ("dracula", "🧛 Dracula"),
+        ("business", "📊 Business"),
+        ("night", "🌃 Night"),
+        ("coffee", "☕ Coffee"),
+        ("dim", "🔅 Dim"),
+    ];
+
+    let current_theme_val = theme.read().clone();
+    let is_dark_mode = dark_themes.iter().any(|(id, _)| *id == current_theme_val) || current_theme_val == "dark";
+    
+    let available_themes = if is_dark_mode { dark_themes } else { light_themes };
 
     let is_route_active = |route: &crate::Route| {
         match (&current_route, route) {

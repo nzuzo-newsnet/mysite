@@ -2,7 +2,56 @@
 @source "./src/**/*.{rs,html,css}";
 
 @plugin "daisyui" {
-  themes: light --default, dark, cupcake, bumblebee, emerald, corporate, synthwave, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset;
+  themes: light --default, dark, cupcake, bumblebee, emerald, corporate, synthwave, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset, glass;
+}
+
+@layer base {
+  /* Define custom properties for the 'glass' theme specifically */
+  [data-theme="glass"] {
+    --color-base-100: 255 255 255;
+    --color-base-content: 0 0 0;
+    --color-primary: 59 130 246;
+    --color-primary-content: 255 255 255;
+    
+    /* Specific glass variables */
+    --glass-bg: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(20px);
+    --glass-saturate: saturate(180%);
+    --glass-border: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Dark mode variant for glass theme could also be defined if needed, 
+     but let's focus on making it work first */
+
+  /* Standard themes glass overrides */
+  [data-theme="light"], [data-theme="cupcake"] {
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-blur: blur(12px);
+    --glass-saturate: saturate(150%);
+    --glass-border: rgba(255, 255, 255, 0.5);
+  }
+
+  [data-theme="dark"], [data-theme="night"], [data-theme="dracula"] {
+    --glass-bg: rgba(15, 23, 42, 0.4);
+    --glass-blur: blur(16px);
+    --glass-saturate: saturate(180%);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Component Application */
+  [data-theme="glass"] .card,
+  [data-theme="glass"] nav,
+  [data-theme="glass"] footer,
+  [data-theme="glass"] aside > div,
+  [data-theme="light"] .card,
+  [data-theme="light"] nav,
+  [data-theme="dark"] .card,
+  [data-theme="dark"] nav {
+    background-color: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) var(--glass-saturate) !important;
+    -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate) !important;
+    border: 1px solid var(--glass-border) !important;
+  }
 }
 
 @plugin '@tailwindcss/typography';

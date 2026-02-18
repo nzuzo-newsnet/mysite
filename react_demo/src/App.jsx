@@ -482,62 +482,53 @@ const App = () => {
 
   const currentPseudocode = view === 'sorting' ? (algoType === 'bubble' ? PSEUDOCODE.bubble : PSEUDOCODE.quick) : PSEUDOCODE.dijkstra;
 
-  // Effect to sync theme with parent window
-  useEffect(() => {
-    const syncTheme = () => {
-      try {
-        // Try to get theme from parent if accessible
-        if (window.parent && window.parent.document) {
-          const parentTheme = window.parent.document.documentElement.getAttribute('data-theme');
-          if (parentTheme) {
-            document.documentElement.setAttribute('data-theme', parentTheme);
-          }
-        }
-      } catch (e) {
-        console.warn('Could not sync theme from parent:', e);
-      }
-    };
-
-    // Initial sync
-    syncTheme();
-
-    // Set up observer to watch for parent theme changes
-    let observer;
-    try {
-      if (window.parent && window.parent.document) {
-        observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-              syncTheme();
+      // Effect to sync theme with parent window
+      useEffect(() => {
+        const darkThemes = [
+          "dark", "synthwave", "halloween", "forest", "black", "luxury", "dracula", 
+          "business", "night", "coffee", "dim"
+        ];
+  
+        const applyTheme = (themeName) => {
+          if (!themeName) return;
+          
+          document.documentElement.setAttribute('data-theme', themeName);
+          
+          // Also sync local dark mode state for Lucide icons and internal logic
+          const isDark = darkThemes.includes(themeName) || themeName.includes('dark');
+          // If the app uses a global theme state, update it here.
+          // Currently App uses internal DaisyUI themes via data-theme.
+        };
+  
+        const syncTheme = () => {
+          try {
+            if (window.parent && window.parent.document) {
+              const parentTheme = window.parent.document.documentElement.getAttribute('data-theme');
+              applyTheme(parentTheme);
             }
-          });
-        });
-        
-        observer.observe(window.parent.document.documentElement, {
-          attributes: true,
-          attributeFilter: ['data-theme']
-        });
-      }
-    } catch (e) {
-      // Cross-origin restriction might prevent this
-    }
-
-    // Set up message listener for cross-frame communication
-    const handleMessage = (event) => {
-      if (event.data && event.data.type === 'THEME_CHANGE' && event.data.theme) {
-        document.documentElement.setAttribute('data-theme', event.data.theme);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('message', handleMessage);
-    };
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-base-100 text-base-content font-sans selection:bg-primary/30">
+          } catch (e) {
+            console.warn('Could not sync theme from parent:', e);
+          }
+        };
+  
+        // Initial sync
+        syncTheme();
+  
+        // Set up message listener for cross-frame communication
+        const handleMessage = (event) => {
+          if (event.data && event.data.type === 'THEME_CHANGE' && event.data.theme) {
+            console.log('React App received theme change:', event.data.theme);
+            applyTheme(event.data.theme);
+          }
+        };
+        window.addEventListener('message', handleMessage);
+  
+        return () => {
+          window.removeEventListener('message', handleMessage);
+        };
+      }, []);
+    return (
+    <div className="min-h-screen bg-transparent text-base-content font-sans selection:bg-primary/30">
       
       {/* --- AI Modal --- */}
       {showAI && (
