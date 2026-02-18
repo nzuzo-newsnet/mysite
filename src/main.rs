@@ -29,6 +29,8 @@ enum Route {
     SeriesDetail { name: String },
     #[route("/articles")]
     Articles {},
+    #[route("/demos/algovis")]
+    AlgoVis {},
 }
 
 fn main() {
@@ -171,6 +173,17 @@ fn Articles() -> Element {
             class: "h-dvh flex flex-col overflow-hidden",
             NavBar {}
             pages::articles_page::ArticlesPage {}
+        }
+    }
+}
+
+#[component]
+fn AlgoVis() -> Element {
+    rsx! {
+        div {
+            class: "h-dvh flex flex-col overflow-hidden",
+            NavBar {}
+            pages::algo_vis_page::AlgoVisPage {}
         }
     }
 }

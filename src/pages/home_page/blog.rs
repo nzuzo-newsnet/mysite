@@ -1,81 +1,61 @@
 use dioxus::prelude::*;
-use dioxus_markdown::Markdown;
 
 use crate::markdown_management::{
-    ArticleTomlMetadata, ArticleWithMetadata, fetch_home_page_data_with_metadata,
+    ArticleWithMetadata, fetch_home_page_data_with_metadata,
 };
 
 #[component]
 pub fn Blogs() -> Element {
     // Fetch articles with metadata
     let home_data = use_resource(|| async move {
-        let start = chrono::Local::now();
-        dioxus::logger::tracing::info!(
-            "Starting to fetch home page data with metadata at: {start}"
-        );
-        let result = fetch_home_page_data_with_metadata().await;
-        let end = chrono::Local::now();
-        dioxus::logger::tracing::info!("Fetched home page data at: {end}");
-        result.ok()
+        fetch_home_page_data_with_metadata().await.ok()
     });
 
     rsx! {
-        article {
-            class: "card card-xl h-full flex flex-col",
-            // Latest blog post
+        div {
+            class: "space-y-12",
+            
+            // Featured Post Section
             div {
-                class: "lg:flex-1 lg:h-full lg:overflow-hidden lg:border-b border-base-300",
-                header {
-                    class: "card-header bg-base-100 lg:sticky top-0 z-10",
-                    h2 {
-                        class: "text-xl sm:text-2xl md:text-3xl card-title",
-                        "Latest Blog"
-                    }
+                h2 {
+                    class: "text-xl font-bold mb-6 flex items-center gap-2",
+                    span { class: "w-2 h-6 bg-primary rounded-full" }
+                    "Latest Deep Dive"
                 }
-                section {
-                    class: "card-body lg:overflow-y-auto lg:h-[calc(50vh-5rem)]",
-                    {
-                        match home_data.read().as_ref() {
-                            Some(Some(data)) => {
-                                if let Some(article) = &data.first_article {
-                                    rsx! {
-                                        FullArticlePreview {
-                                            article: article.clone()
-                                        }
-                                    }
-                                } else {
-                                    rsx! {
-                                        div {
-                                            class: "flex justify-center items-center p-8",
-                                            "No articles available"
-                                        }
+                
+                {
+                    match home_data.read().as_ref() {
+                        Some(Some(data)) => {
+                            if let Some(article) = &data.first_article {
+                                rsx! {
+                                    FeaturedArticle {
+                                        article: article.clone()
                                     }
                                 }
-                            },
-                            _ => rsx! {
-                                BlogSkeleton {}
+                            } else {
+                                rsx! {
+                                    div { class: "text-center py-12 bg-base-200 rounded-xl", "No articles found." }
+                                }
                             }
-                        }
+                        },
+                        _ => rsx! { BlogSkeleton {} }
                     }
                 }
             }
 
-            // Recent articles
+            // Recent Writing Section
             div {
-                class: "lg:flex-1 lg:h-full max-h-dvh lg:overflow-hidden",
-                header {
-                    class: "card-header bg-base-100 lg:sticky top-0 z-10",
-                    h2 {
-                        class: "text-lg sm:text-xl md:text-2xl card-title",
-                        "Recent Articles"
-                    }
+                h2 {
+                    class: "text-xl font-bold mb-6 flex items-center gap-2",
+                    span { class: "w-2 h-6 bg-secondary rounded-full" }
+                    "Recent Writing"
                 }
-                section {
-                    class: "card-body h-full lg:overflow-y-auto lg:h-[calc(40vh-5rem)]",
+                
+                div {
+                    class: "grid gap-6 md:grid-cols-2",
                     {
                         match home_data.read().as_ref() {
                             Some(Some(data)) => {
-                                // Skip the first article (already shown above)
                                 let recent_articles: Vec<ArticleWithMetadata> = data.recent_articles
                                     .iter()
                                     .skip(1)
@@ -83,35 +63,24 @@ pub fn Blogs() -> Element {
                                     .collect();
 
                                 rsx! {
-                                    div {
-                                        class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4",
-                                        // Show only first 11 articles
-                                        for article in recent_articles.iter().take(11) {
-                                            ArticleSummaryCard {
-                                                article: article.clone()
-                                            }
+                                    for article in recent_articles.iter().take(4) {
+                                        ArticleCard {
+                                            article: article.clone()
                                         }
-                                        // "Read more" card
-                                        Link {
-                                            to: "/articles",
-                                            class: "card card-sm bg-primary text-primary-content shadow-sm transition-all hover:scale-[1.02]",
-                                            div {
-                                                class: "card-body flex items-center justify-center",
-                                                h3 {
-                                                    class: "card-title text-2xl",
-                                                    "Read More"
-                                                }
-                                                span {
-                                                    class: "text-lg",
-                                                    "→"
-                                                }
-                                            }
-                                        }
+                                    }
+                                    
+                                    // See all button
+                                    Link {
+                                        to: "/articles",
+                                        class: "md:col-span-2 py-4 rounded-xl border border-dashed border-base-300 flex items-center justify-center text-primary font-medium hover:bg-base-200 transition-colors",
+                                        "View All Articles →"
                                     }
                                 }
                             },
                             _ => rsx! {
-                                BlogSkeleton {}
+                                for _ in 0..4 {
+                                    div { class: "h-48 bg-base-200 animate-pulse rounded-xl" }
+                                }
                             }
                         }
                     }
@@ -122,82 +91,62 @@ pub fn Blogs() -> Element {
 }
 
 #[component]
-fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
-    // Extract first few paragraphs for preview (limit to ~300 chars)
-    let preview_content = article.content.chars().take(300).collect::<String>() + "...";
+fn FeaturedArticle(article: ArticleWithMetadata) -> Element {
+    let thumbnail = article.toml_metadata.as_ref().and_then(|m| m.thumbnail.clone());
+    let date = article.toml_metadata.as_ref().and_then(|m| m.date.clone()).unwrap_or_default();
+    let category = article.toml_metadata.as_ref().and_then(|m| m.category.clone()).unwrap_or_else(|| "Deep Dive".to_string());
+    let summary = article.toml_metadata.as_ref().and_then(|m| m.summary.clone()).unwrap_or_else(|| {
+        article.content.chars().take(200).collect::<String>() + "..."
+    });
 
     rsx! {
         div {
-            class: "card lg:card-side bg-base-100 shadow-sm",
-
-            // Figure section: Image AND tags
+            class: "rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-xl border border-base-300 bg-base-100",
             div {
-                class: "flex flex-col gap-3 p-4 lg:w-1/3",
-
-                // Thumbnail if available
-                if let Some(ref metadata) = article.toml_metadata {
-                    if let Some(ref thumbnail) = metadata.thumbnail {
-                        figure {
-                            class: "w-full h-48 overflow-hidden rounded-lg",
-                            img {
-                                src: "{thumbnail}",
-                                alt: "Article thumbnail",
-                                class: "w-full h-full object-cover"
-                            }
-                        }
-                    }
-                }
-
-                // Metadata/Tags
-                if let Some(ref metadata) = article.toml_metadata {
-                    ArticleMetadataDisplay {
-                        metadata: metadata.clone(),
-                        is_full: true
-                    }
-                }
-            }
-
-            // Card body: Title and summary
-            div {
-                class: "card-body lg:w-2/3",
-
-                // Title
-                h2 {
-                    class: "card-title text-2xl",
-                    Link {
-                        to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
-                        class: "link link-primary hover:opacity-80",
-                        "{article.metadata.title}"
-                    }
-                }
-
-                // Summary or content preview
-                if let Some(ref metadata) = article.toml_metadata {
-                    if let Some(ref summary) = metadata.summary {
-                        p {
-                            class: "text-lg text-base-content opacity-80",
-                            "{summary}"
+                class: "md:flex",
+                // Visual / Thumbnail
+                div {
+                    class: "md:w-2/5 h-48 md:h-auto bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden flex items-center justify-center",
+                    if let Some(src) = thumbnail {
+                        img {
+                            src: "{src}",
+                            class: "absolute inset-0 w-full h-full object-cover opacity-80"
                         }
                     } else {
-                        p {
-                            class: "text-base-content opacity-80",
-                            "{preview_content}"
+                        svg { class: "w-20 h-20 opacity-20 text-primary", fill: "none", stroke: "currentColor", view_box: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg",
+                            path { stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "1.5", d: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.67.335a2 2 0 01-1.286.172l-1.63-.408a2 2 0 01-1.327-1.185l-1.012-2.53a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.67.335a2 2 0 01-1.286.172l-1.63-.408a2 2 0 01-1.327-1.185l-1.012-2.53a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.67.335a2 2 0 01-1.286.172l-1.63-.408a2 2 0 01-1.327-1.185l-1.012-2.53a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.67.335a2 2 0 01-1.286.172l-1.63-.408a2 2 0 01-1.327-1.185l-1.012-2.53z" }
                         }
                     }
-                } else {
-                    p {
-                        class: "text-base-content opacity-80",
-                        "{preview_content}"
-                    }
                 }
-
-                // Card actions
+                // Content
                 div {
-                    class: "card-actions justify-end",
+                    class: "p-6 md:p-8 md:w-3/5 flex flex-col justify-center",
+                    div {
+                        class: "flex items-center gap-3 text-xs font-semibold uppercase tracking-wider mb-2",
+                        span { class: "text-primary", "{category}" }
+                        span { class: "text-base-content/50 flex items-center gap-1", 
+                            svg { class: "w-3 h-3", fill: "none", stroke: "currentColor", view_box: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg",
+                                path { stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" }
+                            }
+                            "{date}" 
+                        }
+                    }
                     Link {
                         to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
-                        class: "btn btn-primary",
-                        "Read Full Article"
+                        class: "text-2xl font-bold mb-3 hover:text-primary transition-colors cursor-pointer block",
+                        "{article.metadata.title}"
+                    }
+                    p {
+                        class: "mb-4 line-clamp-3 text-base-content/70",
+                        "{summary}"
+                    }
+                    Link {
+                        to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
+                        class: "inline-flex items-center text-primary hover:text-primary-focus font-medium text-sm group",
+                        "Read Article"
+                        svg { class: "ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform", fill: "none", stroke: "currentColor", view_box: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg",
+                            path { stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M9 5l7 7-7 7" }
+                        }
                     }
                 }
             }
@@ -206,117 +155,34 @@ fn FullArticlePreview(article: ArticleWithMetadata) -> Element {
 }
 
 #[component]
-fn ArticleSummaryCard(article: ArticleWithMetadata) -> Element {
+fn ArticleCard(article: ArticleWithMetadata) -> Element {
+    let date = article.toml_metadata.as_ref().and_then(|m| m.date.clone()).unwrap_or_default();
+    let category = article.toml_metadata.as_ref().and_then(|m| m.category.clone()).unwrap_or_else(|| "Article".to_string());
+    let read_time = article.toml_metadata.as_ref().and_then(|m| m.reading_time.clone()).unwrap_or_else(|| "5 min read".to_string());
+    let summary = article.toml_metadata.as_ref().and_then(|m| m.summary.clone()).unwrap_or_else(|| {
+        article.content.chars().take(150).collect::<String>() + "..."
+    });
+
     rsx! {
         Link {
             to: format!("/article/{}", article.metadata.path.trim_end_matches(".md")),
-            class: "card card-sm image-full bg-base-200 shadow-sm transition-all hover:scale-[1.02]",
-
-            // Thumbnail if available
-            if let Some(ref metadata) = article.toml_metadata {
-                if let Some(ref thumbnail) = metadata.thumbnail {
-                    figure {
-                        class: "h-24 overflow-hidden",
-                        img {
-                            src: "{thumbnail}",
-                            alt: "Article thumbnail",
-                            class: "w-full h-full object-cover"
-                        }
-                    }
-                }
-            }
-
+            class: "rounded-xl p-5 border border-base-300 bg-base-100 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-primary/50 group cursor-pointer block",
             div {
-                class: "card-body",
-
-                // Title
-                h3 {
-                    class: "card-title text-xl mb-2",
-                    "{article.metadata.title}"
-                }
-
-                // Metadata
-                if let Some(ref metadata) = article.toml_metadata {
-                    ArticleMetadataDisplay {
-                        metadata: metadata.clone(),
-                        is_full: false
-                    }
-
-                    // Summary
-                    if let Some(ref summary) = metadata.summary {
-                        p {
-                            class: "text-base-content opacity-70 mt-3 line-clamp-3",
-                            "{summary}"
-                        }
-                    }
-                }
-
-                // Read more
+                class: "flex items-center justify-between mb-3",
                 div {
-                    class: "card-actions justify-end mt-4",
-                    span {
-                        class: "link link-primary text-sm",
-                        "Read more →"
-                    }
+                    class: "flex items-center gap-2 text-xs",
+                    span { class: "px-2 py-1 rounded-md font-medium bg-base-200 text-base-content/70", "{category}" }
+                    span { class: "text-base-content/40", "{read_time}" }
                 }
+                span { class: "text-xs text-base-content/40", "{date}" }
             }
-        }
-    }
-}
-
-#[component]
-fn ArticleMetadataDisplay(metadata: ArticleTomlMetadata, is_full: bool) -> Element {
-    rsx! {
-        div {
-            class: if is_full { "flex flex-wrap gap-3 items-center text-sm" } else { "flex flex-wrap gap-2 items-center text-xs" },
-
-            // Date
-            if let Some(ref date) = metadata.date {
-                span {
-                    class: "badge badge-ghost",
-                    "📅 {date}"
-                }
+            h3 {
+                class: "text-lg font-bold mb-2 group-hover:text-primary transition-colors line-clamp-2",
+                "{article.metadata.title}"
             }
-
-            // Reading time
-            if let Some(ref reading_time) = metadata.reading_time {
-                span {
-                    class: "badge badge-ghost",
-                    "⏱️ {reading_time}"
-                }
-            }
-
-            // Category
-            if let Some(ref category) = metadata.category {
-                span {
-                    class: "badge badge-primary",
-                    "{category}"
-                }
-            }
-
-            // Topics/Tags (show first few)
-            if is_full {
-                for topic in metadata.topics.iter().take(3) {
-                    span {
-                        class: "badge badge-secondary",
-                        "{topic}"
-                    }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn BlogItem(source: String) -> Element {
-    rsx! {
-        article {
-            class: "card",
-            div {
-                class: "prose max-w-none",
-                Markdown {
-                    content: source,
-                }
+            p {
+                class: "text-sm line-clamp-3 text-base-content/60",
+                "{summary}"
             }
         }
     }
@@ -326,23 +192,18 @@ fn BlogItem(source: String) -> Element {
 fn BlogSkeleton() -> Element {
     rsx! {
         div {
-            class: "animate-pulse p-8 space-y-4",
-            // Title skeleton
+            class: "animate-pulse rounded-xl border border-base-300 bg-base-100 h-64 flex flex-col md:flex-row",
+            div { class: "md:w-2/5 bg-base-200 h-48 md:h-auto" }
             div {
-                class: "h-8 bg-gray-300 rounded w-3/4",
-            }
-            // Paragraph skeletons
-            div {
-                class: "space-y-3",
-                div { class: "h-4 bg-gray-300 rounded" }
-                div { class: "h-4 bg-gray-300 rounded w-5/6" }
-                div { class: "h-4 bg-gray-300 rounded w-4/6" }
-            }
-            div {
-                class: "space-y-3 pt-4",
-                div { class: "h-4 bg-gray-300 rounded" }
-                div { class: "h-4 bg-gray-300 rounded w-5/6" }
+                class: "p-6 md:p-8 md:w-3/5 space-y-4",
+                div { class: "h-4 bg-base-200 rounded w-1/4" }
+                div { class: "h-8 bg-base-200 rounded w-3/4" }
+                div { class: "space-y-2",
+                    div { class: "h-4 bg-base-200 rounded" }
+                    div { class: "h-4 bg-base-200 rounded w-5/6" }
+                }
             }
         }
     }
 }
+

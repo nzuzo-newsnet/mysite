@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use crate::Route;
 
 #[derive(Clone, PartialEq)]
 struct Demo {
@@ -37,6 +38,12 @@ impl DemoCategory {
 pub fn DemosPage() -> Element {
     // Sample demos - replace with your actual demos
     let demos = vec![
+        Demo {
+            title: "Algorithm Visualizer".to_string(),
+            description: "An interactive React-based tool visualizing sorting and pathfinding algorithms, integrated via iframe to demonstrate React expertise.".to_string(),
+            category: DemoCategory::Design,
+            link: Some("/demos/algovis".to_string()),
+        },
         Demo {
             title: "Rust Web Framework".to_string(),
             description: "A high-performance web framework built with Rust, featuring async/await and type safety.".to_string(),
@@ -88,51 +95,54 @@ pub fn DemosPage() -> Element {
 
     rsx! {
         main {
-            class: "flex-1 overflow-y-auto p-8",
+            class: "flex-1 overflow-y-auto",
             div {
-                class: "container mx-auto max-w-6xl",
+                class: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12",
 
             // Header
             div {
-                class: "mb-8",
+                class: "mb-12 max-w-3xl",
                 h1 {
-                    class: "text-3xl font-bold mb-4",
+                    class: "text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary",
                     "Demos & Projects"
                 }
                 p {
-                    class: "text-lg text-base-content opacity-70",
-                    "Explore my work across different domains"
+                    class: "text-lg text-base-content/70",
+                    "Explore my work across different domains, from distributed systems to interactive UI experiments."
                 }
             }
 
             // Category filters
             div {
-                class: "flex gap-3 mb-8 flex-wrap",
+                class: "flex gap-2 mb-10 overflow-x-auto pb-2 scrollbar-hide",
                 button {
-                    class: if selected_category.read().is_none() { "btn btn-primary" } else { "btn btn-ghost" },
+                    class: if selected_category.read().is_none() { 
+                        "px-4 py-2 rounded-full bg-primary text-primary-content font-medium transition-colors"
+                    } else { 
+                        "px-4 py-2 rounded-full bg-base-200 text-base-content/70 hover:bg-base-300 font-medium transition-colors"
+                    },
                     onclick: move |_| selected_category.set(None),
                     "All"
                 }
-                button {
-                    class: if matches!(*selected_category.read(), Some(DemoCategory::Languages)) { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(Some(DemoCategory::Languages)),
-                    "Languages"
-                }
-                button {
-                    class: if matches!(*selected_category.read(), Some(DemoCategory::Design)) { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(Some(DemoCategory::Design)),
-                    "Design"
-                }
-                button {
-                    class: if matches!(*selected_category.read(), Some(DemoCategory::DataAnalytics)) { "btn btn-primary" } else { "btn btn-ghost" },
-                    onclick: move |_| selected_category.set(Some(DemoCategory::DataAnalytics)),
-                    "Data Analytics"
+                for category in [DemoCategory::Languages, DemoCategory::Design, DemoCategory::DataAnalytics] {
+                    button {
+                        class: if selected_category.read().as_ref() == Some(&category) { 
+                            "px-4 py-2 rounded-full bg-primary text-primary-content font-medium transition-colors"
+                        } else { 
+                            "px-4 py-2 rounded-full bg-base-200 text-base-content/70 hover:bg-base-300 font-medium transition-colors"
+                        },
+                        onclick: {
+                            let category = category.clone();
+                            move |_| selected_category.set(Some(category.clone()))
+                        },
+                        "{category.as_str()}"
+                    }
                 }
             }
 
             // Demos grid
             div {
-                class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+                class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8",
                 for demo in filtered_demos {
                     DemoCard { demo: demo.clone() }
                 }
@@ -146,33 +156,63 @@ pub fn DemosPage() -> Element {
 fn DemoCard(demo: Demo) -> Element {
     rsx! {
         article {
-            class: "card card-lg bg-base-200 hover:shadow-xl transition-shadow",
+            class: "flex flex-col rounded-2xl border border-base-300 bg-base-100 overflow-hidden shadow-sm transition-all hover:shadow-xl hover:border-primary/30 group",
+            
+            // Card visual (placeholder)
             div {
-                class: "card-body",
+                class: "h-48 bg-gradient-to-br from-base-200 to-base-300 relative flex items-center justify-center overflow-hidden",
                 div {
-                    class: "flex justify-between items-start mb-3",
-                    h3 {
-                        class: "card-title text-xl",
-                        "{demo.title}"
+                    class: "absolute inset-0 opacity-10 group-hover:scale-110 transition-transform duration-500",
+                    svg { class: "w-full h-full", fill: "currentColor", view_box: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg",
+                        path { d: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" }
                     }
-                    span {
-                        class: "badge {demo.category.badge_class()}",
-                        "{demo.category.as_str()}"
-                    }
+                }
+                span {
+                    class: "badge {demo.category.badge_class()} absolute top-4 right-4 shadow-sm",
+                    "{demo.category.as_str()}"
+                }
+            }
+
+            div {
+                class: "p-6 flex flex-col flex-1",
+                h3 {
+                    class: "text-xl font-bold mb-3 group-hover:text-primary transition-colors",
+                    "{demo.title}"
                 }
                 p {
-                    class: "text-base-content opacity-70 mb-4 flex-grow",
+                    class: "text-base-content/60 text-sm mb-6 flex-grow",
                     "{demo.description}"
                 }
+                
                 if let Some(link) = &demo.link {
                     div {
-                        class: "card-actions justify-end",
-                        a {
-                            href: "{link}",
-                            target: "_blank",
-                            class: "btn btn-primary btn-sm",
-                            "View Demo"
+                        class: "mt-auto pt-4 border-t border-base-200",
+                        if link == "/demos/algovis" {
+                            Link {
+                                to: Route::AlgoVis {},
+                                class: "inline-flex items-center text-primary font-bold text-sm group/link",
+                                "View Demo"
+                                svg { class: "ml-1 w-4 h-4 group-hover/link:translate-x-1 transition-transform", fill: "none", stroke: "currentColor", view_box: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg",
+                                    path { stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M9 5l7 7-7 7" }
+                                }
+                            }
+                        } else {
+                             a {
+                                href: "{link}",
+                                target: if link.starts_with('/') { "" } else { "_blank" },
+                                class: "inline-flex items-center text-primary font-bold text-sm group/link",
+                                "View Project"
+                                svg { class: "ml-1 w-4 h-4 group-hover/link:translate-x-1 transition-transform", fill: "none", stroke: "currentColor", view_box: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg",
+                                    path { stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M9 5l7 7-7 7" }
+                                }
+                            }
                         }
+                    }
+                } else {
+                    div {
+                        class: "mt-auto pt-4 border-t border-base-200 flex justify-between items-center",
+                        span { class: "text-xs font-medium text-base-content/40", "Case Study Coming Soon" }
+                        div { class: "w-2 h-2 rounded-full bg-base-300" }
                     }
                 }
             }

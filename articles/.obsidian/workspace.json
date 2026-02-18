@@ -22,6 +22,18 @@
             }
           },
           {
+            "id": "82bdc77255a0526e",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.11.5"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.11.5"
+            }
+          },
+          {
             "id": "99f07024e9910cb5",
             "type": "leaf",
             "state": {
@@ -35,7 +47,8 @@
               "title": "02-procedural-macros-and-code-generation"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -183,7 +196,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "16e5ce9226d50ab6",
+  "active": "82bdc77255a0526e",
   "lastOpenFiles": [
     "cloudflare-and-rust.md",
     "cloudlfare-and-rust.md",
