@@ -72,7 +72,6 @@ pub fn NavBar() -> Element {
         ("retro", "📺 Retro"),
         ("valentine", "💝 Valentine"),
         ("garden", "🌻 Garden"),
-        ("aqua", "🌊 Aqua"),
         ("lofi", "🎵 Lo-Fi"),
         ("pastel", "🎨 Pastel"),
         ("fantasy", "🦄 Fantasy"),
@@ -83,7 +82,6 @@ pub fn NavBar() -> Element {
         ("lemonade", "🍋 Lemonade"),
         ("winter", "❄️ Winter"),
         ("nord", "🏔️ Nord"),
-        ("sunset", "🌅 Sunset"),
     ];
 
     let dark_themes = vec![
@@ -91,6 +89,7 @@ pub fn NavBar() -> Element {
         ("synthwave", "🌆 Synthwave"),
         ("halloween", "🎃 Halloween"),
         ("forest", "🌲 Forest"),
+        ("aqua", "🌊 Aqua"),
         ("black", "⬜ Black"),
         ("luxury", "💎 Luxury"),
         ("dracula", "🧛 Dracula"),
@@ -98,6 +97,7 @@ pub fn NavBar() -> Element {
         ("night", "🌃 Night"),
         ("coffee", "☕ Coffee"),
         ("dim", "🔅 Dim"),
+        ("sunset", "🌅 Sunset"),
     ];
 
     let current_theme_val = theme.read().clone();

@@ -73,7 +73,7 @@ fn App() -> Element {
             class: "fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-base-300",
             img {
                 src: "/main_image.jpg",
-                class: "w-full h-full object-cover blur-3xl opacity-50 scale-105",
+                class: "w-full h-full object-cover blur-[100px] opacity-50 scale-110",
                 alt: "Background"
             }
         }

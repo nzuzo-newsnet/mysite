@@ -328,45 +328,9 @@ const App = () => {
   // Info State
   const [currentLine, setCurrentLine] = useState(-1);
   const [explanation, setExplanation] = useState([]);
-  const [showAI, setShowAI] = useState(false);
-  const [aiResponse, setAiResponse] = useState('');
-  const [loadingAI, setLoadingAI] = useState(false);
 
   const generatorRef = useRef(null);
   const intervalRef = useRef(null);
-
-  // -------------------------
-  // AI Logic (Gemini API)
-  // -------------------------
-  const callGemini = async () => {
-    setLoadingAI(true);
-    setAiResponse('');
-    const apiKey = ""; // Runtime provided
-    
-    const prompt = `Explain the ${algoType === 'bubble' ? 'Bubble Sort' : algoType === 'quick' ? 'Quick Sort' : 'Dijkstra Pathfinding'} algorithm to a beginner. 
-    Explain its time complexity and why it is useful. Keep it concise (max 3 sentences per section).`;
-
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          })
-        }
-      );
-      
-      const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Failed to generate explanation.";
-      setAiResponse(text);
-    } catch (error) {
-      setAiResponse("Error connecting to Gemini API. Please try again.");
-    } finally {
-      setLoadingAI(false);
-    }
-  };
 
   // -------------------------
   // Initialization
@@ -530,45 +494,6 @@ const App = () => {
     return (
     <div className="min-h-screen bg-transparent text-base-content font-sans selection:bg-primary/30">
       
-      {/* --- AI Modal --- */}
-      {showAI && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[80vh]">
-            <div className="flex justify-between items-center p-5 border-b border-slate-800">
-              <div className="flex items-center gap-2 text-indigo-400">
-                <Sparkles size={20} />
-                <h3 className="font-bold text-white">Gemini Insight</h3>
-              </div>
-              <button onClick={() => setShowAI(false)} className="text-slate-400 hover:text-white"><X size={20}/></button>
-            </div>
-            <div className="p-6 overflow-y-auto custom-scrollbar">
-              {!aiResponse && !loadingAI && (
-                <div className="text-center py-8">
-                  <p className="text-slate-400 mb-4">Ask Gemini to explain the current algorithm in detail.</p>
-                  <button 
-                    onClick={callGemini}
-                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-medium transition-all shadow-lg shadow-indigo-900/20"
-                  >
-                    Generate Explanation
-                  </button>
-                </div>
-              )}
-              {loadingAI && (
-                <div className="flex flex-col items-center py-8 gap-3">
-                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-indigo-400 animate-pulse">Consulting the oracle...</span>
-                </div>
-              )}
-              {aiResponse && (
-                <div className="prose prose-invert prose-sm max-w-none">
-                  <p className="whitespace-pre-wrap leading-relaxed text-slate-300">{aiResponse}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* --- Header --- */}
       <header className="border-b border-base-300 bg-base-100/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -601,13 +526,6 @@ const App = () => {
               <Map size={16} /> Pathfinding
             </button>
           </nav>
-
-          <button 
-            onClick={() => setShowAI(true)}
-            className="flex items-center gap-2 text-secondary hover:text-secondary-focus transition-colors bg-secondary/10 px-3 py-1.5 rounded-full border border-secondary/20 text-sm font-medium"
-          >
-            <Sparkles size={16} /> Ask AI
-          </button>
         </div>
       </header>
 
